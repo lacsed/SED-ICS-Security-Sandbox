@@ -4,20 +4,45 @@ class TemperatureTransmitter:
     R = 10
     C = 0.1
 
-    def __init__(self, id, initial_temperature, current_temperature, final_temperature):
+    def __init__(self, id, initial_temperature, current_temperature, final_temperature, heatingTime):
         self.id = id
         self.initial_temperature = initial_temperature
         self.current_temperature = current_temperature
         self.final_temperature = final_temperature
+        self.heatingTime = heatingTime
+    
+    def set_initial_temperature(self, initial_temperature):
+        self.initial_temperature = initial_temperature
+        print(f"Initial temperature set to {self.initial_temperature} °C")
+    
+    def set_current_temperature(self, current_temperature):
+        self.current_temperature = current_temperature
+        print(f"Current temperature set to {self.current_temperature} °C")
+    
+    def set_final_temperature(self, final_temperature):
+        self.final_temperature = final_temperature
+        print(f"Final temperature set to {self.final_temperature} °C")
+    
+    def set_heating_time(self, heating_time):
+        self.heatingTime = heating_time
+        print(f"Heating time set to {self.heatingTime} minutes")
 
-    def heating_circuit(self, heating_time):
+    def initialize_heating_circuit(self):
         tau = TemperatureTransmitter.R * TemperatureTransmitter.C
-        time_seconds = heating_time * 60
-        temperature = 0.0
+        time_seconds = self.heating_time * 60
+        temperature = self.current_temperature
 
         for t in range(int(time_seconds)):
-            temperature = (self.final_temperature + self.current_temperature - self.final_temperature) * \
-                          math.exp(-t / tau)
+            temperature += (self.final_temperature - temperature) * (1 - math.exp(-1 / tau))
+            self.set_current_temperature(temperature)
             print(f"Time: {t / 60} minutes, Temperature: {temperature:.2f} °C")
 
+        self.set_final_temperature(self.current_temperature)
+
         return temperature
+    
+    def start_heating(self):
+        print("Heating started")
+    
+    def stop_heating(self):
+        print("Heating stopped")

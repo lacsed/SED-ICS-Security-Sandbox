@@ -4,6 +4,13 @@ class Valve:
         self.flow = flow
         self.flow_rate = flow_rate
 
+    def set_valve_flow_rate(self):
+        self.flow_rate = self.flow_rate
+        print(f"Valve flow rate set to {self.flow_rate}%")
+
     def set_valve_flow(self):
         self.flow *= self.flow_rate
-        print(f"Valve flow set to {self.flow}l/s")
+        print(f"Valve flow rate set to {self.flow}l/s")
+
+    def open_valve(self):
+        print("Valve opened")
