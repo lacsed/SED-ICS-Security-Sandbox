@@ -1,15 +1,16 @@
 import math
 
+
 class TemperatureTransmitter:
     R = 10
     C = 0.1
 
-    def __init__(self, id, initial_temperature, current_temperature, final_temperature, heatingTime):
+    def __init__(self, id, initial_temperature, current_temperature, final_temperature, heating_time):
         self.id = id
         self.initial_temperature = initial_temperature
         self.current_temperature = current_temperature
         self.final_temperature = final_temperature
-        self.heatingTime = heatingTime
+        self.heating_time = heating_time
     
     def set_initial_temperature(self, initial_temperature):
         self.initial_temperature = initial_temperature
@@ -24,8 +25,8 @@ class TemperatureTransmitter:
         print(f"Final temperature set to {self.final_temperature} °C")
     
     def set_heating_time(self, heating_time):
-        self.heatingTime = heating_time
-        print(f"Heating time set to {self.heatingTime} minutes")
+        self.heating_time = heating_time
+        print(f"Heating time set to {self.heating_time} minutes")
 
     def initialize_heating_circuit(self):
         tau = TemperatureTransmitter.R * TemperatureTransmitter.C
@@ -41,8 +42,10 @@ class TemperatureTransmitter:
 
         return temperature
     
-    def start_heating(self):
+    @staticmethod
+    def start_heating():
         print("Heating started")
     
-    def stop_heating(self):
+    @staticmethod
+    def stop_heating():
         print("Heating stopped")

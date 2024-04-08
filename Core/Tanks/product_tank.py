@@ -9,17 +9,16 @@ from OPCClient.opc_client import OPCClient
 
 
 class ProductTank(Tank):
-    def __init__(self, capacity: float, batch: float, inlet_valve: Valve,
-                 outlet_valve: Valve, level_transmitter: LevelTransmitter, pump: Pump,
-                 opc_client: OPCClient):
-        super().__init__(type(ProductTank).__name__, capacity, batch)
+    def __init__(self, capacity: float, batch: float, inlet_valve: Valve, outlet_valve: Valve,
+                 level_transmitter: LevelTransmitter, pump: Pump, opc_client: OPCClient):
+        super().__init__("ProductTank", capacity, batch)
         self.inlet_valve = inlet_valve
         self.outlet_valve = outlet_valve
         self.level_transmitter = level_transmitter
         self.pump = pump
         self.opc_client = opc_client
-    
-    def pump_tank(self):
+
+    def pump(self):
         print(f"Pumping tank '{self.name}'...")
         self.pump.start_pump()
 
@@ -29,7 +28,7 @@ class ProductTank(Tank):
         self.pump.stop_pump()
 
         print(f"Tank '{self.name}' pumped.")
-    
+
     def fill_and_empty(self):
         time_to_fill = self.batch / self.inlet_valve.flow_rate
 
@@ -48,6 +47,6 @@ class ProductTank(Tank):
         time.sleep(time_to_empty)
         print(f"Tank '{self.name}' emptied.")
 
-        self.pump_tank()
+        self.pump()
 
         print("Processing completed.")

@@ -9,9 +9,6 @@ class OPCServer:
         self.objects = None
         self.obj = None
         self.var = None
-        self.heating_process_started = False
-        self.mixing_process_started = False
-        self.product_process_started = False
 
     def start(self):
         try:
@@ -34,27 +31,34 @@ class OPCServer:
                     print("Failed to add object to OPC UA server.")
             else:
                 print("Failed to get objects node from OPC UA server.")
+
+            self.obj.add_method(self.idx, "start_heating_process", self.start_heating_process)
+            self.obj.add_method(self.idx, "start_mixing_process", self.start_mixing_process)
+            self.obj.add_method(self.idx, "start_product_process", self.start_product_process)
+
         except Exception as e:
             print("Error starting OPC UA server:", e)
-    
-    def start_heating_process(self):
+
+    def start_heating_process(self, parent, *args):
         try:
-            self.heating_process_started = True
             print("Heating process started on the server.")
+            return True
         except Exception as e:
             print("Error starting heating process on the server:", e)
-    
-    def start_mixing_process(self):
+            return False
+
+    def start_mixing_process(self, parent, *args):
         try:
-            self.mixing_process_started = True
             print("Mixing process started on the server.")
+            return True
         except Exception as e:
             print("Error starting mixing process on the server:", e)
+            return False
 
-    def start_product_process(self):
+    def start_product_process(self, parent, *args):
         try:
-            self.product_process_started = True
             print("Product process started on the server.")
+            return True
         except Exception as e:
             print("Error starting product process on the server:", e)
 
