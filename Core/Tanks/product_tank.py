@@ -18,12 +18,12 @@ class ProductTank(Tank):
         self.pump = pump
         self.opc_client = opc_client
 
-    def pump(self):
+    def pump_start(self):
         print(f"Pumping tank '{self.name}'...")
         self.pump.start_pump()
 
         time_to_pump = self.batch / self.pump.flow_rate
-        time.sleep(time_to_pump)
+        #time.sleep(time_to_pump)
 
         self.pump.stop_pump()
 
@@ -33,10 +33,10 @@ class ProductTank(Tank):
         time_to_fill = self.batch / self.inlet_valve.flow_rate
 
         print(f"Filling tank '{self.name}'...")
-        time.sleep(time_to_fill)
+        #time.sleep(time_to_fill)
         print(f"Tank '{self.name}' filled.")
 
-        if self.opc_client.start_product_process():
+        if self.opc_client.start_product_process:
             print("Product process started on the server.")
         else:
             print("Failed to start product process on the server.")
@@ -44,9 +44,9 @@ class ProductTank(Tank):
         time_to_empty = self.batch / self.outlet_valve.flow_rate
 
         print(f"Emptying tank '{self.name}'...")
-        time.sleep(time_to_empty)
+        #time.sleep(time_to_empty)
         print(f"Tank '{self.name}' emptied.")
 
-        self.pump()
+        self.pump_start()
 
-        print("Processing completed.")
+        print("Processing completed.\n\n")

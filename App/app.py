@@ -46,7 +46,7 @@ if __name__ == "__main__":
                                pump=Pump("P303", 20, 0.8),
                                opc_client=opc_client3)
 
-    while i < 10:
+    while i < 1:
         heating_tank.fill_and_heat(initial_temperature=25.0, final_temperature=50.0, time_to_heat=5)
         mixing_tank.fill_and_mix(time_to_mix=10)
         product_tank.fill_and_empty()

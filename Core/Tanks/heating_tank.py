@@ -24,16 +24,16 @@ class HeatingTank(Tank):
         self.temperature_transmitter.set_initial_temperature(initial_temperature)
         self.temperature_transmitter.set_final_temperature(final_temperature)
 
-        if self.opc_client.start_heating_process():
+        if self.opc_client.start_heating_process:
             print("Heating process started on the server.")
-            self.opc_client.write_variable(self.temperature_transmitter.current_temperature)
+            #self.opc_client.write_variable(temperature_identifier, self.temperature_transmitter.current_temperature)
         else:
             print("Failed to start the heating process on the server.")
 
         self.temperature_transmitter.set_heating_time(time_to_heat)
-        self.temperature_transmitter.initialize_heating_circuit()
+        self.temperature_transmitter.initialize_heating_circuit()   ''
 
-        time.sleep(time_to_heat * 60)
+        #time.sleep(time_to_heat * 60)
 
         self.temperature_transmitter.stop_heating()
 
@@ -43,9 +43,9 @@ class HeatingTank(Tank):
         time_to_fill = self.batch / self.inlet_valve.flow_rate
 
         print(f"Filling tank '{self.name}'...")
-        time.sleep(time_to_fill)
+        #time.sleep(time_to_fill)
         print(f"Tank '{self.name}' filled.")
 
         self.heat(initial_temperature, final_temperature, time_to_heat)
 
-        print("Processing completed.")
+        print("Processing completed.\n\n")

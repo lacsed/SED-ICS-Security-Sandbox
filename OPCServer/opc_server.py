@@ -1,6 +1,5 @@
 from opcua import Server
 
-
 class OPCServer:
     def __init__(self):
         self.server = Server()
@@ -9,6 +8,7 @@ class OPCServer:
         self.objects = None
         self.obj = None
         self.var = None
+        self.method_ids = {}
 
     def start(self):
         try:
@@ -21,20 +21,20 @@ class OPCServer:
             if self.objects is not None:
                 self.obj = self.objects.add_object(self.idx, "MyObject")
                 if self.obj is not None:
-                    self.var = self.obj.add_variable(self.idx, "MyVariable", 6.7)
+                    self.var = self.obj.add_variable(self.idx, "Temperature", 0.0)
                     if self.var is not None:
                         self.var.set_writable()
-                        print("Variable added to OPC UA server.")
+                        print("Temperature variable added to OPC UA server.")
                     else:
-                        print("Failed to add variable to OPC UA server.")
+                        print("Failed to add temperature variable to OPC UA server.")
                 else:
                     print("Failed to add object to OPC UA server.")
             else:
                 print("Failed to get objects node from OPC UA server.")
 
-            self.obj.add_method(self.idx, "start_heating_process", self.start_heating_process)
-            self.obj.add_method(self.idx, "start_mixing_process", self.start_mixing_process)
-            self.obj.add_method(self.idx, "start_product_process", self.start_product_process)
+            self.method_ids["start_heating_process"] = self.obj.add_method(self.idx, "start_heating_process", self.start_heating_process)
+            self.method_ids["start_mixing_process"] = self.obj.add_method(self.idx, "start_mixing_process", self.start_mixing_process)
+            self.method_ids["start_product_process"] = self.obj.add_method(self.idx, "start_product_process", self.start_product_process)
 
         except Exception as e:
             print("Error starting OPC UA server:", e)

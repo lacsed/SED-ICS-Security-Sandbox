@@ -1,3 +1,7 @@
+from colorama import init, Fore, Style
+
+init()
+
 class Mixer:
     def __init__(self, id, mixing_time):
         self.id = id
@@ -5,10 +9,10 @@ class Mixer:
 
     def set_mixing_time(self, mixing_time):
         self.mixing_time = mixing_time
-        print(f"Mixing time set to {self.mixing_time} minutes")
+        print(Fore.GREEN + f"[{self.id}] Mixing time set to {self.mixing_time} minutes" + Style.RESET_ALL)
     
     def start_mixing(self):
-        print("Mixer started")
+        print(Fore.GREEN + f"[{self.id}] Mixer started" + Style.RESET_ALL)
     
     def stop_mixing(self):
-        print("Mixer stopped")
+        print(Fore.GREEN + f"[{self.id}] Mixer stopped" + Style.RESET_ALL)

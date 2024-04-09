@@ -1,6 +1,5 @@
 from opcua import Client
 
-
 class OPCClient:
     def __init__(self, server_url="opc.tcp://localhost:4840/freeopcua/server/"):
         self.server_url = server_url

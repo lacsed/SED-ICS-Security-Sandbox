@@ -23,7 +23,7 @@ class MixingTank(Tank):
 
         self.mixer.set_mixing_time(time_to_mix)
         self.mixer.start_mixing()
-        time.sleep(time_to_mix)
+        #time.sleep(time_to_mix)
 
         self.mixer.stop_mixing()
         print(f"Tank '{self.name}' mixed.")
@@ -32,10 +32,10 @@ class MixingTank(Tank):
         time_to_fill = self.batch / self.inlet_valve.flow_rate
 
         print(f"Filling tank '{self.name}'...")
-        time.sleep(time_to_fill)
+        #time.sleep(time_to_fill)
         print(f"Tank '{self.name}' filled.")
 
-        if self.opc_client.start_mixing_process():
+        if self.opc_client.start_mixing_process:
             print("Mixing process started on the server.")
         else:
             print("Failed to start mixing process on the server.")
@@ -45,7 +45,7 @@ class MixingTank(Tank):
         time_to_empty = self.batch / self.outlet_valve.flow_rate
 
         print(f"Emptying tank '{self.name}'...")
-        time.sleep(time_to_empty)
+        #time.sleep(time_to_empty)
         print(f"Tank '{self.name}' emptied.")
 
-        print("Processing completed.")
+        print("Processing completed.\n\n")
