@@ -28,7 +28,7 @@ if __name__ == "__main__":
     heating_tank = HeatingTank(capacity=100,
                                batch=60,
                                inlet_valve=Valve("FV101", 20, 0.8),
-                               temperature_transmitter=TemperatureTransmitter("TT102", 25, 25, 100, 30),
+                               temperature_transmitter=TemperatureTransmitter("TT102", 25, 25, 100, 2),
                                level_transmitter=LevelTransmitter("LT103", 0, 60, 100),
                                opc_client=opc_client1)
 
@@ -47,7 +47,7 @@ if __name__ == "__main__":
                                opc_client=opc_client3)
 
     while i < 1:
-        heating_tank.fill_and_heat(initial_temperature=25.0, final_temperature=50.0, time_to_heat=5)
+        heating_tank.fill_and_heat(initial_temperature=25.0, final_temperature=100.0, time_to_heat=5)
         mixing_tank.fill_and_mix(time_to_mix=10)
         product_tank.fill_and_empty()
 

@@ -1,36 +1,41 @@
 from opcua import Client
 
+
 class OPCClient:
     def __init__(self, server_url="opc.tcp://localhost:4840/freeopcua/server/"):
         self.server_url = server_url
-        self.client = None
-        self.obj = None
-        self.heating_method = None
-        self.mixing_method = None
-        self.product_method = None
+        self.client = Client(server_url)
+        self.variables = {
+            "temperature": None,
+            "flow": None,
+            "time": None,
+            "level": None
+        }
 
     def connect(self):
         try:
-            self.client = Client(self.server_url)
             self.client.connect()
-            print("OPC UA client connected successfully.")
-
-            self.obj = self.client.get_objects_node().get_child(["2:MyObject"])
-
-            self.heating_method = self.obj.get_child(["2:start_heating_process"])
-            self.mixing_method = self.obj.get_child(["2:start_mixing_process"])
-            self.product_method = self.obj.get_child(["2:start_product_process"])
-
+            print("Cliente OPC UA conectado com sucesso.")
+            self.root = self.client.get_root_node()
+            for var_name in self.variables:
+                self.variables[var_name] = self.root.get_child(["0:Objects", "2:Tags", f"2:{var_name.capitalize()}"])
         except Exception as e:
-            print("Error connecting OPC UA client:", e)
+            print("Erro ao conectar o cliente OPC UA:", e)
 
     def disconnect(self):
         try:
             if self.client:
                 self.client.disconnect()
-                print("OPC UA client disconnected successfully.")
+                print("Cliente OPC UA desconectado com sucesso.")
         except Exception as e:
-            print("Error when disconnecting OPC UA client:", e)
+            print("Erro ao desconectar o cliente OPC UA:", e)
+
+    def write_variable(self, var_type, value):
+        if var_type in self.variables:
+            self.variables[var_type].set_value(value)
+            print(f"Variável '{var_type}' escrita com sucesso.")
+        else:
+            print(f"Tipo de variável '{var_type}' não encontrado.")
 
     def start_heating_process(self):
         try:

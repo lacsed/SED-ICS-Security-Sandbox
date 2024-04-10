@@ -1,43 +1,49 @@
 from opcua import Server
 
+
 class OPCServer:
     def __init__(self):
         self.server = Server()
         self.uri = "http://industrialplant.com"
-        self.idx = None
-        self.objects = None
-        self.obj = None
-        self.var = None
-        self.method_ids = {}
+        self.idx = self.server.register_namespace(self.uri)
 
     def start(self):
         try:
-            print("Starting OPC UA server...")
+            print("Iniciando servidor OPC UA...")
             self.server.set_endpoint("opc.tcp://localhost:4840/freeopcua/server/")
             self.server.start()
-            print("OPC UA server started successfully.")
-            self.idx = self.server.register_namespace(self.uri)
-            self.objects = self.server.get_objects_node()
-            if self.objects is not None:
-                self.obj = self.objects.add_object(self.idx, "MyObject")
-                if self.obj is not None:
-                    self.var = self.obj.add_variable(self.idx, "Temperature", 0.0)
-                    if self.var is not None:
-                        self.var.set_writable()
-                        print("Temperature variable added to OPC UA server.")
-                    else:
-                        print("Failed to add temperature variable to OPC UA server.")
-                else:
-                    print("Failed to add object to OPC UA server.")
-            else:
-                print("Failed to get objects node from OPC UA server.")
+            print("Servidor OPC UA iniciado com sucesso.")
+            objects = self.server.nodes.objects
+            self.obj = objects.add_object(self.idx, "Tags")
 
-            self.method_ids["start_heating_process"] = self.obj.add_method(self.idx, "start_heating_process", self.start_heating_process)
-            self.method_ids["start_mixing_process"] = self.obj.add_method(self.idx, "start_mixing_process", self.start_mixing_process)
-            self.method_ids["start_product_process"] = self.obj.add_method(self.idx, "start_product_process", self.start_product_process)
+            self.temperature_var = self.obj.add_variable(self.idx, "Temperature", 0)
+            self.flow_var = self.obj.add_variable(self.idx, "Flow", 0)
+            self.time_var = self.obj.add_variable(self.idx, "Time", 0)
+            self.level_var = self.obj.add_variable(self.idx, "Level", 0)
 
+            self.temperature_var.set_writable()
+            self.flow_var.set_writable()
+            self.time_var.set_writable()
+            self.level_var.set_writable()
         except Exception as e:
-            print("Error starting OPC UA server:", e)
+            print("Erro ao iniciar servidor OPC UA:", e)
+
+    def stop(self):
+        try:
+            self.server.stop()
+            print("Servidor OPC UA interrompido.")
+        except Exception as e:
+            print("Erro ao interromper servidor OPC UA:", e)
+
+    def write_variable(self, var_type, value):
+        if var_type == "temperature":
+            self.temperature_var.set_value(value)
+        elif var_type == "flow":
+            self.flow_var.set_value(value)
+        elif var_type == "time":
+            self.time_var.set_value(value)
+        elif var_type == "level":
+            self.level_var.set_value(value)
 
     def start_heating_process(self, parent, *args):
         try:
