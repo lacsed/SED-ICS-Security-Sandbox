@@ -28,6 +28,7 @@ if __name__ == "__main__":
     heating_tank = HeatingTank(capacity=100,
                                batch=60,
                                inlet_valve=Valve("FV101", 20, 0.8),
+                               outlet_valve=Valve("FV104", 20, 0.8),
                                temperature_transmitter=TemperatureTransmitter("TT102", 25, 25, 100, 2),
                                level_transmitter=LevelTransmitter("LT103", 0, 60, 100),
                                opc_client=opc_client1)

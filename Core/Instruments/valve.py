@@ -15,7 +15,7 @@ class Valve:
 
     def set_valve_flow(self):
         self.flow *= self.flow_rate
-        print(Fore.MAGENTA + f"[{self.id}] Valve flow rate set to {self.flow}l/s" + Style.RESET_ALL)
+        print(Fore.MAGENTA + f"[{self.id}] Valve flow set to {self.flow}l/s" + Style.RESET_ALL)
 
     def open_valve(self):
         print(Fore.MAGENTA + f"[{self.id}] Valve opened" + Style.RESET_ALL)

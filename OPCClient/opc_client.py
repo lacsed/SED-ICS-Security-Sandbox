@@ -15,27 +15,27 @@ class OPCClient:
     def connect(self):
         try:
             self.client.connect()
-            print("Cliente OPC UA conectado com sucesso.")
+            print("OPC UA client connected successfully.")
             self.root = self.client.get_root_node()
             for var_name in self.variables:
                 self.variables[var_name] = self.root.get_child(["0:Objects", "2:Tags", f"2:{var_name.capitalize()}"])
         except Exception as e:
-            print("Erro ao conectar o cliente OPC UA:", e)
+            print("Error connecting OPC UA client:", e)
 
     def disconnect(self):
         try:
             if self.client:
                 self.client.disconnect()
-                print("Cliente OPC UA desconectado com sucesso.")
+                print("OPC UA client disconnected successfully.")
         except Exception as e:
-            print("Erro ao desconectar o cliente OPC UA:", e)
+            print("Error disconnecting OPC UA client:", e)
 
     def write_variable(self, var_type, value):
         if var_type in self.variables:
             self.variables[var_type].set_value(value)
-            print(f"Variável '{var_type}' escrita com sucesso.")
+            print(f"Variable '{var_type}' written successfully.")
         else:
-            print(f"Tipo de variável '{var_type}' não encontrado.")
+            print(f"Variable type '{var_type}' not found.")
 
     def start_heating_process(self):
         try:

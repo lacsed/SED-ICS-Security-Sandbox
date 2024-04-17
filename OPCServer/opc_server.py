@@ -9,10 +9,10 @@ class OPCServer:
 
     def start(self):
         try:
-            print("Iniciando servidor OPC UA...")
+            print("Starting OPC UA server...")
             self.server.set_endpoint("opc.tcp://localhost:4840/freeopcua/server/")
             self.server.start()
-            print("Servidor OPC UA iniciado com sucesso.")
+            print("OPC UA server started successfully.")
             objects = self.server.nodes.objects
             self.obj = objects.add_object(self.idx, "Tags")
 
@@ -26,14 +26,14 @@ class OPCServer:
             self.time_var.set_writable()
             self.level_var.set_writable()
         except Exception as e:
-            print("Erro ao iniciar servidor OPC UA:", e)
+            print("Error when starting OPC UA server:", e)
 
     def stop(self):
         try:
             self.server.stop()
-            print("Servidor OPC UA interrompido.")
+            print("OPC UA server stopped.")
         except Exception as e:
-            print("Erro ao interromper servidor OPC UA:", e)
+            print("Error when stopping OPC UA server:", e)
 
     def write_variable(self, var_type, value):
         if var_type == "temperature":
