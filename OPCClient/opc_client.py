@@ -32,10 +32,23 @@ class OPCClient:
 
     def write_variable(self, var_type, value):
         if var_type in self.variables:
-            self.variables[var_type].set_value(value)
-            print(f"Variable '{var_type}' written successfully.")
+            try:
+                self.variables[var_type].set_value(value)
+                print(f"Variable '{var_type}' written successfully.")
+            except Exception as e:
+                print(f"Error writing variable '{var_type}':", e)
         else:
             print(f"Variable type '{var_type}' not found.")
+
+    def read_log_messages(self):
+        try:
+            log_node = self.root.get_child(["0:Objects", "3:Log"])
+            log_data = log_node.get_value()
+            print("Log messages:")
+            for msg in log_data:
+                print(msg)
+        except Exception as e:
+            print("Error reading log messages:", e)
 
     def start_heating_process(self):
         try:

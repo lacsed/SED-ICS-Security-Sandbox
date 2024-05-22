@@ -1,3 +1,4 @@
+from datetime import datetime
 from opcua import Server
 
 
@@ -6,6 +7,7 @@ class OPCServer:
         self.server = Server()
         self.uri = "http://industrialplant.com"
         self.idx = self.server.register_namespace(self.uri)
+        self.message_log = []
 
     def start(self):
         try:
@@ -35,15 +37,27 @@ class OPCServer:
         except Exception as e:
             print("Error when stopping OPC UA server:", e)
 
-    def write_variable(self, var_type, value):
-        if var_type == "temperature":
-            self.temperature_var.set_value(value)
-        elif var_type == "flow":
-            self.flow_var.set_value(value)
-        elif var_type == "time":
-            self.time_var.set_value(value)
-        elif var_type == "level":
-            self.level_var.set_value(value)
+    def write_variable(self, var_name, value):
+        try:
+            variable = getattr(self, f"{var_name}_var", None)
+            if variable is not None:
+                variable.set_value(value)
+                self.log_message(var_name, value)
+            else:
+                print(f"Variable '{var_name}' not found.")
+        except Exception as e:
+            print("Error writing variable:", e)
+
+    def log_message(self, name, value):
+        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        message = {"name": name, "value": value, "timestamp": timestamp}
+        self.message_log.append(message)
+
+    def remove_messages(self, num_messages):
+        if num_messages <= len(self.message_log):
+            self.message_log = self.message_log[:-num_messages]
+        else:
+            print("There are not enough messages to remove.")
 
     def start_heating_process(self, parent, *args):
         try:

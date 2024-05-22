@@ -10,14 +10,14 @@ class Pump:
 
     def set_pump_flow_rate(self):
         self.flow_rate = self.flow_rate
-        print(Fore.YELLOW + f"[{self.id}] Pump flow rate set to {self.flow_rate}%" + Style.RESET_ALL)
+        print(Fore.CYAN + f"[{self.id}] Pump flow rate set to {self.flow_rate}%" + Style.RESET_ALL)
 
     def set_pump_flow(self):
         self.flow *= self.flow_rate
-        print(Fore.YELLOW + f"[{self.id}] Pump flow set to {self.flow}l/s" + Style.RESET_ALL)
+        print(Fore.CYAN + f"[{self.id}] Pump flow set to {self.flow}l/s" + Style.RESET_ALL)
 
     def start_pump(self):
-        print(Fore.YELLOW + f"[{self.id}] Pump started" + Style.RESET_ALL)
+        print(Fore.CYAN + f"[{self.id}] Pump started" + Style.RESET_ALL)
     
     def stop_pump(self):
-        print(Fore.YELLOW + f"[{self.id}] Pump stopped" + Style.RESET_ALL)
+        print(Fore.CYAN + f"[{self.id}] Pump stopped" + Style.RESET_ALL)

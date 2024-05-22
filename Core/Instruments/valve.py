@@ -19,3 +19,6 @@ class Valve:
 
     def open_valve(self):
         print(Fore.MAGENTA + f"[{self.id}] Valve opened" + Style.RESET_ALL)
+
+    def close_valve(self):
+        print(Fore.MAGENTA + f"[{self.id}] Valve closed" + Style.RESET_ALL)
