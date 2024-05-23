@@ -1,14 +1,13 @@
 import ultrades.automata as ud
 from Core.Control.DES.Automaton import Automaton
 from Core.Control.DES.Supervisor import Supervisor
-from Core.Instruments.mixer import Mixer as MixerDevice
 from colorama import init, Fore, Style
 
 init()
 
 
 class Mixer:
-    def __init__(self, mixer_id, mixing_time, level_H1, reset, init, cooled, turn_off_tcontrol, turn_on_tcontrol, mixed=False):
+    def __init__(self, mixer_device, level_H1, reset, init, cooled, turn_off_tcontrol, turn_on_tcontrol, mixed=False):
         self.level_H1 = level_H1
         self.reset = reset
         self.init = init
@@ -16,7 +15,7 @@ class Mixer:
         self.turn_on_tcontrol = turn_on_tcontrol
         self.cooled = cooled
         self.mixed = mixed
-        self.mixer_device = MixerDevice(mixer_id, mixing_time)
+        self.mixer_device = mixer_device
 
     # Events
     turn_on_mixer = ud.event('11', True)

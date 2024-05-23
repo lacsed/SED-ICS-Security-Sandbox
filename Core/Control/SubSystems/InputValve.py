@@ -1,14 +1,13 @@
 import ultrades.automata as ud
 from Core.Control.DES.Automaton import Automaton
 from Core.Control.DES.Supervisor import Supervisor
-from Core.Instruments.valve import Valve
 from colorama import init, Fore, Style
 
 init()
 
 
 class InputValve:
-    def __init__(self, valve_id, flow, flow_rate, level_H1, reset, process_start, finish, init, turn_on_tcontrol,
+    def __init__(self, valve_device, level_H1, reset, process_start, finish, init, turn_on_tcontrol,
                  valve_in=False, state_process=0):
         self.valve_in = valve_in
         self.state_process = state_process
@@ -18,7 +17,7 @@ class InputValve:
         self.finish = finish
         self.init = init
         self.turn_on_tcontrol = turn_on_tcontrol
-        self.valve = Valve(valve_id, flow, flow_rate)
+        self.valve_device = valve_device
 
     # Events
     open_vin = ud.event('1', True)
@@ -47,16 +46,16 @@ class InputValve:
 
     def vin_0_action(self):
         self.valve_in = False
-        self.valve.close_valve()
+        self.valve_device.close_valve()
 
     def vin_1_action(self):
         self.valve_in = True
         self.state_process = 1
-        self.valve.set_valve_flow_rate()
-        self.valve.open_valve()
+        self.valve_device.set_valve_flow_rate()
+        self.valve_device.open_valve()
 
     def vin_level_h1_action(self):
-        self.valve.set_valve_flow()
+        self.valve_device.set_valve_flow()
 
     def vin_open_vin_action(self):
         self.outcoming_msg.append(self.open_vin)

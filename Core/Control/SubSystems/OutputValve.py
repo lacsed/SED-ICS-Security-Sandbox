@@ -1,14 +1,13 @@
 import ultrades.automata as ud
 from Core.Control.DES.Automaton import Automaton
 from Core.Control.DES.Supervisor import Supervisor
-from Core.Instruments.valve import Valve
 from colorama import init, Fore, Style
 
 init()
 
 
 class OutputValve:
-    def __init__(self, valve_id, flow, flow_rate, level_L1, reset, init, cooled, turn_off_tcontrol, turn_on_tcontrol,
+    def __init__(self, valve_device, level_L1, reset, init, cooled, turn_off_tcontrol, turn_on_tcontrol,
                  valve_out=False, state_process=0):
         self.level_L1 = level_L1
         self.reset = reset
@@ -18,7 +17,7 @@ class OutputValve:
         self.cooled = cooled
         self.valve_out = valve_out
         self.state_process = state_process
-        self.valve = Valve(valve_id, flow, flow_rate)
+        self.valve_device = valve_device
 
     # Events
     open_vout = ud.event('5', True)
@@ -43,13 +42,13 @@ class OutputValve:
 
     def vout_0_action(self):
         self.valve_out = False
-        self.valve.close_valve()
+        self.valve_device.close_valve()
 
     def vout_1_action(self):
         self.valve_out = True
         self.state_process = 4
-        self.valve.set_valve_flow_rate()
-        self.valve.open_valve()
+        self.valve_device.set_valve_flow_rate()
+        self.valve_device.open_valve()
 
     def vout_open_vout_action(self):
         self.outcoming_msg.append(self.open_vout)
@@ -58,7 +57,7 @@ class OutputValve:
         self.outcoming_msg.append(self.close_vout)
 
     def vout_level_l1_action(self):
-        self.valve.set_valve_flow()
+        self.valve_device.set_valve_flow()
 
     def s2_0_action(self):
         self.s2.enable(self.close_vout)

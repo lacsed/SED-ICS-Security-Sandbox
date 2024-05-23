@@ -1,6 +1,8 @@
 import math
 from colorama import init, Fore, Style
 
+from OPCClient.opc_client import OPCClient
+
 init()
 
 
@@ -8,12 +10,13 @@ class TemperatureTransmitter:
     R = 500
     C = 0.02
 
-    def __init__(self, id, initial_temperature, current_temperature, final_temperature, heating_time):
+    def __init__(self, id, initial_temperature, current_temperature, final_temperature, heating_time, opc_client: OPCClient):
         self.id = id
         self.initial_temperature = initial_temperature
         self.current_temperature = current_temperature
         self.final_temperature = final_temperature
         self.heating_time = heating_time
+        self.opc_client = opc_client
     
     def set_initial_temperature(self, initial_temperature):
         self.initial_temperature = initial_temperature
@@ -37,7 +40,6 @@ class TemperatureTransmitter:
 
         temperature += (self.final_temperature - temperature) * (1 - math.exp(-(time_elapsed/60) / tau))
         self.set_current_temperature(temperature)
-        self.set_final_temperature(self.final_temperature)
 
         return temperature
 

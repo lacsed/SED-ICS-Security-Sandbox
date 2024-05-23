@@ -1,20 +1,19 @@
 import ultrades.automata as ud
 from Core.Control.DES.Automaton import Automaton
 from Core.Control.DES.Supervisor import Supervisor
-from Core.Instruments.pump import Pump as PumpDevice
 from colorama import init, Fore, Style
 
 init()
 
 
 class Pump:
-    def __init__(self, pump_id, flow, flow_rate, reset, init, heated, cooled, pumped=False):
+    def __init__(self, pump_device, reset, init, heated, cooled, pumped=False):
         self.reset = reset
         self.init = init
         self.heated = heated
         self.cooled = cooled
         self.pumped = pumped
-        self.pump_device = PumpDevice(pump_id, flow, flow_rate)
+        self.pump_device = pump_device
 
     # Events
     turn_on_pump = ud.event('15', True)

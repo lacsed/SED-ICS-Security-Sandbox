@@ -1,14 +1,14 @@
 import ultrades.automata as ud
 from Core.Control.DES.Automaton import Automaton
 from Core.Control.DES.Supervisor import Supervisor
-from Core.Instruments.temperature_transmitter import TemperatureTransmitter
 from colorama import init, Fore, Style
+
 
 init()
 
 
 class Temperature:
-    def __init__(self, temp_id, initial_temperature, current_temperature, final_temperature, heating_time, reset, init, cooled, heated, turn_off_tcontrol, turn_on_tcontrol, state_process=0):
+    def __init__(self, temperature_device, reset, init, cooled, heated, turn_off_tcontrol, turn_on_tcontrol, state_process=0):
         self.reset = reset
         self.init = init
         self.turn_off_tcontrol = turn_off_tcontrol
@@ -16,7 +16,7 @@ class Temperature:
         self.cooled = cooled
         self.heated = heated
         self.state_process = state_process
-        self.temp_device = TemperatureTransmitter(temp_id, initial_temperature, current_temperature, final_temperature, heating_time)
+        self.temp_device = temperature_device
 
     # Events
     turn_on_tcontrol = ud.event('19', True)
@@ -37,29 +37,64 @@ class Temperature:
     outcoming_msg = []
 
     def temp_0_action(self):
+        print("Executing temp_0_action")
         self.temp_device.stop_heating()
 
     def temp_1_action(self):
-        self.temp_device.start_heating()
-        temperature = self.temp_device.initialize_heating_circuit(5)
-        print(Fore.RED + f"[{self.temp_device.id}] Temperature after heating: {temperature:.2f} °C" + Style.RESET_ALL)
+        if self.temp_device.opc_client.start_heating_process:
+            print("Heating process started on the server.")
+        else:
+            print("Failed to start the heating process on the server.")
 
-    def temp_turn_on_tcontrol_action(self):
-        self.outcoming_msg.append(self.turn_on_tcontrol)
-        self.state_process = 2
         self.temp_device.start_heating()
         self.temp_device.set_initial_temperature(self.temp_device.initial_temperature)
         self.temp_device.set_final_temperature(self.temp_device.final_temperature)
         self.temp_device.set_heating_time(self.temp_device.heating_time)
 
+        print(f"Activate device '{self.temp_device.id}'...")
+
+        time_in_seconds = self.temp_device.heating_time * 60
+        time_elapsed = 0
+
+        for t in range(int(time_in_seconds)):
+            time_elapsed += 1
+            seconds = t % 60
+
+            if time_elapsed == 10:
+                current_temp = self.temp_device.initialize_heating_circuit(t)
+                print(
+                    Fore.RED + f"[{self.temp_device.id}] Time: {int(t / 60)}m {seconds}s, Temperature: {current_temp:.2f} °C" + Style.RESET_ALL)
+                self.temp_device.opc_client.write_variable("temperature", self.temp_device.current_temperature)
+                time_elapsed = 0
+
+                if current_temp >= self.temp_device.final_temperature:
+                    print(
+                        Fore.RED + f"Desired temperature {self.temp_device.final_temperature:.2f} °C reached." + Style.RESET_ALL)
+                    self.temp.trigger(self.turn_off_tcontrol)
+                    break
+
+        self.temp_device.stop_heating()
+        print(f"Tank '{self.temp_device.id}' heated to {self.temp_device.current_temperature:.2f}°C.")
+
+    def temp_turn_on_tcontrol_action(self):
+        print("Executing temp_turn_on_tcontrol_action")
+        self.outcoming_msg.append(self.turn_on_tcontrol)
+        self.state_process = 2
+        self.temp_device.start_heating()
+        self.temp_1_action()
+
     def temp_turn_off_tcontrol_action(self):
+        print("Executing temp_turn_off_tcontrol_action")
         self.outcoming_msg.append(self.turn_off_tcontrol)
         self.temp_device.stop_heating()
+        self.temp_0_action()
 
     def temp_heated_action(self):
+        print("Executing temp_heated_action")
         self.state_process = 3
 
     def temp_cooled_action(self):
+        print("Executing temp_cooled_action")
         self.temp_device.set_current_temperature(self.temp_device.initial_temperature)
 
     def s10_0_action(self):

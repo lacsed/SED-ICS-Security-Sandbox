@@ -1,13 +1,16 @@
 from colorama import init, Fore, Style
 
+from OPCClient.opc_client import OPCClient
+
 init()
 
 
 class Valve:
-    def __init__(self, id, flow, flow_rate):
+    def __init__(self, id, flow, flow_rate, opc_client: OPCClient):
         self.id = id
         self.flow = flow
         self.flow_rate = flow_rate
+        self.opc_client = opc_client
 
     def set_valve_flow_rate(self):
         self.flow_rate = self.flow_rate
