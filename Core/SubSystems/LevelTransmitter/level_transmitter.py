@@ -19,10 +19,13 @@ class LevelTransmitter(threading.Thread):
             time.sleep(1)
 
         self.semaphore.acquire()
+        time.sleep(1)
         print("Filling Tank.")
         while self.client.read_open_input_valve():
             current_volume += 10
             level = (current_volume / TANK_CAPACITY) * 100
+            # self.client.update_variable("Level", level)
+            # self.client.update_variable("Volume", current_volume)
             print(Fore.BLUE + f"Level in {level:.2f}% of capacity" + Style.RESET_ALL)
 
             if level == 100:
@@ -37,9 +40,8 @@ class LevelTransmitter(threading.Thread):
         while not self.client.read_open_output_valve():
             time.sleep(1)
 
-        # pegar variavel do servodor no pump e decrementar
-
         self.semaphore.acquire()
+        time.sleep(1)
         print("Emptying Tank.")
         while self.client.read_open_output_valve():
             current_volume -= 10

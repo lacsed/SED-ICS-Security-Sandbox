@@ -15,6 +15,8 @@ class Pump(threading.Thread):
         self.pump_automaton = PumpAutomaton().initialize_automaton()
 
     def run(self):
+        printer_count = 0
+
         while not self.client.read_pump_on():
             self.pump_automaton.trigger('Reset')
             time.sleep(1)
@@ -31,7 +33,11 @@ class Pump(threading.Thread):
                     break
 
                 time_elapsed = time.time() - start_time
-                print(Fore.MAGENTA + f"Pumping tank." + Style.RESET_ALL)
+                printer_count += 1
+
+                if printer_count == 100:
+                    print(Fore.MAGENTA + f"Pumping tank." + Style.RESET_ALL)
+                    printer_count = 0
 
             self.semaphore.release()
 

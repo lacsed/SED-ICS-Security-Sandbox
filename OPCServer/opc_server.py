@@ -1,6 +1,8 @@
 from datetime import datetime
 from opcua import Server
 
+from Configuration.set_points import INITIAL_TEMP
+
 
 class OPCServer:
     def __init__(self):
@@ -39,7 +41,10 @@ class OPCServer:
                 "Mixer_Off": self.obj.add_variable(self.idx, "Mixer_Off", False),
                 "Pump_On": self.obj.add_variable(self.idx, "Pump_On", False),
                 "Pump_Off": self.obj.add_variable(self.idx, "Pump_Off", False),
-                "Reset": self.obj.add_variable(self.idx, "Reset", False)
+                "Reset": self.obj.add_variable(self.idx, "Reset", False),
+                "Level": self.obj.add_variable(self.idx, "Level", 0),
+                "Temperature": self.obj.add_variable(self.idx, "Temperature", INITIAL_TEMP),
+                "Volume": self.obj.add_variable(self.idx, "Volume", 0)
             }
 
             for var in self.variables.values():

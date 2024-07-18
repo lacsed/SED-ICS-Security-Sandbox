@@ -19,46 +19,46 @@ if __name__ == "__main__":
     system_initialized = False
     semaphore = threading.Semaphore(1)
 
-    # Iniciar o servidor
+    # Initialize server
     server = OPCServer()
     server.start()
 
-    # Conectar o cliente para o processo da planta
+    # Connect process plant client
     process_client = OPCClient()
     process_client.connect()
     process = Process(semaphore, process_client)
 
-    # Conectar o cliente para a válvula de entrada
+    # Connect input valve client
     client_input = OPCClient()
     client_input.connect()
     input_valve = InputValve(client_input)
 
-    # Conectar o cliente para a válvula de saída
+    # Connect output valve client
     client_output = OPCClient()
     client_output.connect()
     output_valve = OutputValve(client_output)
 
-    # Conectar o cliente para a o trasmissor de nível
+    # Connect level transmitter client
     client_level_transmitter = OPCClient()
     client_level_transmitter.connect()
     level_transmitter = LevelTransmitter(semaphore, client_level_transmitter)
 
-    # Conectar o cliente para o mixer
+    # Connect mixer client
     client_mixer = OPCClient()
     client_mixer.connect()
     mixer = Mixer(semaphore, client_mixer)
 
-    # Conectar o cliente para a bomba
+    # Connect pump client
     client_pump = OPCClient()
     client_pump.connect()
     pump = Pump(semaphore, client_pump)
 
-    # Conectar o cliente para o controlador de temperatura
+    # Connect temperature control client
     client_temperature_control = OPCClient()
     client_temperature_control.connect()
     temperature_control = TemperatureControl(semaphore, client_temperature_control)
 
-    # Iniciar o controlador
+    # Initialize controller
     controller = Controller(semaphore, server)
 
     def initialize_system():
@@ -90,12 +90,12 @@ if __name__ == "__main__":
             print("Invalid response. Please enter 'y' for yes or 'n' for no.")
             return False
 
-    # Manter a execução do programa até uma interrupção ser detectada
+    # Keep the execution of program until a keyboard interruption
     while True:
         try:
             response = input("\nInitialize system? (y/n): ").strip().lower()
             if check_response(response):
-                time.sleep(100)
+                time.sleep(1000)
         except TerminateProgramException as e:
             print("Stopping all threads and server...")
             controller.join()

@@ -28,7 +28,10 @@ class OPCClient:
             "Mixer_Off": None,
             "Pump_On": None,
             "Pump_Off": None,
-            "Reset": None
+            "Reset": None,
+            "Level": None,
+            "Temperature": None,
+            "Volume": None
         }
 
     def connect(self):
@@ -72,7 +75,7 @@ class OPCClient:
         else:
             print(Fore.LIGHTRED_EX + f"Variable type '{var_type}' not found." + Style.RESET_ALL)
 
-    def update_variable(self, var_name, value: bool):
+    def update_variable(self, var_name, value):
         self.write_variable(var_name, value)
 
     def query_variable(self, var_name):

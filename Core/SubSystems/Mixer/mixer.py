@@ -15,6 +15,8 @@ class Mixer(threading.Thread):
         self.mixer_automaton = MixerAutomaton().initialize_automaton()
 
     def run(self):
+        printer_count = 0
+
         while not self.client.read_mixer_on():
             self.mixer_automaton.trigger('Reset')
             time.sleep(1)
@@ -31,7 +33,11 @@ class Mixer(threading.Thread):
                     break
 
                 time_elapsed = time.time() - start_time
-                print(Fore.CYAN + f"Mixing tank." + Style.RESET_ALL)
+                printer_count += 1
+
+                if printer_count == 150:
+                    print(Fore.CYAN + f"Mixing tank." + Style.RESET_ALL)
+                    printer_count = 0
 
             self.semaphore.release()
 
