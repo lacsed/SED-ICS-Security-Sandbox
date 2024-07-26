@@ -55,10 +55,19 @@ class OPCClient:
     def write_variable(self, var_type, value):
         if var_type in self.variables:
             try:
-                self.variables[var_type].set_value(ua.Variant(value, ua.VariantType.Boolean))
+                if isinstance(value, bool):
+                    variant_type = ua.VariantType.Boolean
+                elif isinstance(value, int):
+                    variant_type = ua.VariantType.Int32
+                elif isinstance(value, float):
+                    variant_type = ua.VariantType.Float
+                else:
+                    raise ValueError(f"Unsupported variable type: {type(value)}")
+
+                self.variables[var_type].set_value(ua.Variant(value, variant_type))
                 print(Fore.YELLOW + f"Variable '{var_type}' written successfully." + Style.RESET_ALL)
             except Exception as e:
-                print(Fore.LIGHTRED_EX + f"Error writing variable '{var_type}':", e, Style.RESET_ALL)
+                print(Fore.LIGHTRED_EX + f"Error writing variable '{var_type}': {e}" + Style.RESET_ALL)
         else:
             print(Fore.LIGHTRED_EX + f"Variable type '{var_type}' not found." + Style.RESET_ALL)
 

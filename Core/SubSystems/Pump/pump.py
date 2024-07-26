@@ -23,11 +23,10 @@ class Pump(threading.Thread):
 
         self.pump_automaton.trigger('Pump_On')
         while self.client.read_pump_on():
-            self.semaphore.acquire()
-
             start_time = time.time()
             time_elapsed = 0
 
+            self.semaphore.acquire()
             while time_elapsed <= PUMPING_TIME:
                 if self.client.read_pump_off():
                     break
@@ -39,6 +38,8 @@ class Pump(threading.Thread):
                     print(Fore.MAGENTA + f"Pumping tank." + Style.RESET_ALL)
                     printer_count = 0
 
+            self.client.update_pump_on(False)
+            time.sleep(1)
             self.semaphore.release()
 
         if self.client.read_pump_off():

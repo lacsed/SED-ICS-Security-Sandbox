@@ -2,6 +2,7 @@ import threading
 import time
 
 from Core.Control.controller import Controller
+from Core.Process.Tank.tank import Tank
 from Core.SubSystems.InputValve.input_valve import InputValve
 from Core.SubSystems.LevelTransmitter.level_transmitter import LevelTransmitter
 from Core.SubSystems.Mixer.mixer import Mixer
@@ -27,6 +28,11 @@ if __name__ == "__main__":
     process_client = OPCClient()
     process_client.connect()
     process = Process(semaphore, process_client)
+
+    # Connect tank plant client
+    tank_client = OPCClient()
+    tank_client.connect()
+    tank = Tank(semaphore, process_client)
 
     # Connect input valve client
     client_input = OPCClient()
@@ -66,6 +72,7 @@ if __name__ == "__main__":
         if not system_initialized:
             system_initialized = True
             process.start()
+            tank.start_threads()
             input_valve.start()
             output_valve.start()
             mixer.start()
@@ -100,6 +107,7 @@ if __name__ == "__main__":
             print("Stopping all threads and server...")
             controller.join()
             process.join()
+            tank.join_threads()
             input_valve.join()
             output_valve.join()
             mixer.join()

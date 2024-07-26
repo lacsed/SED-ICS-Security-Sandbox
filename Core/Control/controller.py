@@ -1,5 +1,6 @@
 import threading
 import time
+from collections import deque
 
 from colorama import Fore, Style
 
@@ -29,21 +30,16 @@ class Controller(threading.Thread):
     def __init__(self, semaphore, server: OPCServer):
         super().__init__()
         self.semaphore = semaphore
+        self.unprocessed_events = deque()
+        self.processed_events = set()
         self.server = server
 
     def run(self):
-        '''controlable_events = ['Start_Process', 'Finish_Process',
+        controlable_events = ['Start_Process', 'Finish_Process',
                               'Open_Input_Valve', 'Close_Input_Valve',
                               'Open_Output_Valve', 'Close_Output_Valve',
                               'Control_Temperature_On', 'Control_Temperature_Off',
-                              'Mixer_On', 'Mixer_Off', 'Pump_On', 'Pump_Off', 'Reset']'''
-
-        controlable_events = ['Start_Process', 'Open_Input_Valve',
-                              'Close_Input_Valve', 'Mixer_On',
-                              'Mixer_Off', 'Control_Temperature_On',
-                              'Control_Temperature_Off', 'Pump_On',
-                              'Pump_Off', 'Open_Output_Valve',
-                              'Close_Output_Valve', 'Finish_Process', 'Reset']
+                              'Mixer_On', 'Mixer_Off', 'Pump_On', 'Pump_Off', 'Reset']
 
         uncontrolable_events = ['Level_High', 'Level_Low', 'Heated', 'Cooled']
 
@@ -106,34 +102,56 @@ class Controller(threading.Thread):
         while not self.server.start_process():
             time.sleep(1)
 
+        def process_uncontrolable_events():
+            for uncontrolable_event in uncontrolable_events:
+                if self.server.query_variable(uncontrolable_event):
+                    for sup in control.supervisors:
+                        if sup.is_feasible(uncontrolable_event):
+                            sup.trigger(uncontrolable_event)
+
         def process_event(current_event):
-            for plant in control.plants:
-                possible_events = plant.possible_events()
-                if current_event in possible_events:
-                    if plant.is_feasible(current_event):
-                        for sup in control.supervisors:
-                            if sup.is_disabled(current_event):
-                                break
-                            else:
-                                self.semaphore.acquire()
+            if current_event in self.processed_events:
+                return
 
-                                plant.trigger(current_event)
-                                sup.trigger(current_event)
-                                control.update_des()
-                                self.server.update_variable(current_event, True)
-                                time.sleep(1)
-                                print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' executed successfully." + Style.RESET_ALL)
+            possible_plants = [plant for plant in control.plants if plant.is_defined(event)]
+            time.sleep(1)
 
-                                self.semaphore.release()
-                                break
+            event_processed = False
+            for plant in possible_plants:
+                if plant.is_feasible(current_event):
+                    if any(sup.is_disabled(current_event) for sup in control.supervisors):
+                        print(f"Event {event} is disabled by a supervisor and cannot be triggered.")
                     else:
-                        print(Fore.LIGHTWHITE_EX +
-                              f"Event '{current_event}' is not feasible in the current state of the plant '{plant.name}'." + Style.RESET_ALL)
-                else:
-                    print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' is not possible in the plant '{plant.name}'." + Style.RESET_ALL)
+                        self.semaphore.acquire()
 
-        for supervisor in control.supervisors:
-            for event in controlable_events:
-                if not supervisor.is_disabled(event):
-                    process_event(event)
-                    # print(f"Estado {supervisor.current_state.num_state} do supervisor {supervisor.name}")
+                        plant.trigger(current_event)
+                        control.trigger_supervisors(current_event)
+                        control.update_des()
+                        self.server.update_variable(current_event, True)
+                        time.sleep(1)
+                        print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' executed successfully." + Style.RESET_ALL)
+
+                        self.semaphore.release()
+                        self.processed_events.add(current_event)
+                        event_processed = True
+                        break
+                else:
+                    print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' is not feasible in the current state of the plant '{plant.name}'." + Style.RESET_ALL)
+
+            if not event_processed:
+                self.unprocessed_events.append(current_event)
+
+            self.semaphore.acquire()
+            process_uncontrolable_events()
+            time.sleep(1)
+            self.semaphore.release()
+
+        while True:
+            for supervisor in control.supervisors:
+                for event in controlable_events:
+                    if not supervisor.is_disabled(event):
+                        process_event(event)
+
+            while self.unprocessed_events:
+                event = self.unprocessed_events.popleft()
+                process_event(event)

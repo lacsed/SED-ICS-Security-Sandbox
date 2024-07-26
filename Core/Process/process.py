@@ -13,7 +13,7 @@ class Process(threading.Thread):
         self.process_automaton = ProcessAutomaton()
 
     def run(self):
-        while self.client.read_init() is not True:
+        while not self.client.read_init():
             time.sleep(1)
 
         time.sleep(1)

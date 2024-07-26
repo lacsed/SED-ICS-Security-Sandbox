@@ -39,6 +39,8 @@ class Mixer(threading.Thread):
                     print(Fore.CYAN + f"Mixing tank." + Style.RESET_ALL)
                     printer_count = 0
 
+            self.client.update_mixer_on(False)
+            time.sleep(1)
             self.semaphore.release()
 
         if self.client.read_mixer_off():

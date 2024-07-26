@@ -83,7 +83,7 @@ class OPCServer:
         else:
             print("There are not enough messages to remove.")
 
-    def update_variable(self, var_name: str, value: bool):
+    def update_variable(self, var_name: str, value):
         self.write_variable(var_name, value)
 
     def query_variable(self, var_name: str):

@@ -25,30 +25,32 @@ class DES:
     def supervisor_states(self):
         for supervisor in self.supervisors:
             state = supervisor.current_state_num()
-        print()
 
     def add_supervisor(self, sup: Supervisor):
         self.supervisors.append(sup)
         self.num_sups += 1
 
     def trigger_if_possible(self, event):
-        if any(supervisor.is_disabled(event) for supervisor in self.supervisors):
-            print(f"Event {event} is disabled by a supervisor and cannot be triggered.")
-            return False
+        if any(plant.is_defined(event) for plant in self.plants):
+            if any(plant.is_feasible(event) for plant in self.plants):
+                if any(supervisor.is_disabled(event) for supervisor in self.supervisors):
+                    print(f"Event {event} is disabled by a supervisor and cannot be triggered.")
+                    return False
+                else:
+                    # Trigger in all plants and supervisors
+                    for plant in self.plants:
+                        plant.trigger(event)
 
-        # Trigger in all plants and supervisors
-        for plant in self.plants:
-            plant.trigger(event)
+                    for supervisor in self.supervisors:
+                        supervisor.trigger(event)
 
-        for supervisor in self.supervisors:
-            supervisor.trigger(event)
-
-        self.update_des()
+                    self.update_des()
         return True
 
     def trigger_supervisors(self, event):
         for supervisor in self.supervisors:
-            supervisor.trigger(event)
+            if supervisor.is_feasible(event):
+                supervisor.trigger(event)
 
     def enabled_events(self):
         for i in range(self.num_c_events):
@@ -79,7 +81,6 @@ class DES:
 
             for supervisor in self.supervisors:
                 supervisor.trigger(self.action_list[self.next_event])
-                print("AQUI")
 
             self.next_event += 1
             if self.next_event >= self.list_size:

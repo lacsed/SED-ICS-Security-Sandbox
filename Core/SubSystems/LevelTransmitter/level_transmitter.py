@@ -1,9 +1,7 @@
 import threading
 import time
-from colorama import Fore, Style
 
 from OPCClient.opc_client import OPCClient
-from Configuration.set_points import TANK_CAPACITY
 
 
 class LevelTransmitter(threading.Thread):
@@ -13,46 +11,24 @@ class LevelTransmitter(threading.Thread):
         self.client = client
 
     def run(self):
-        current_volume = 0
-
-        while not self.client.read_open_input_valve():
+        while self.client.query_variable('Level') < 100:
             time.sleep(1)
 
-        self.semaphore.acquire()
-        time.sleep(1)
-        print("Filling Tank.")
         while self.client.read_open_input_valve():
-            current_volume += 10
-            level = (current_volume / TANK_CAPACITY) * 100
-            # self.client.update_variable("Level", level)
-            # self.client.update_variable("Volume", current_volume)
-            print(Fore.BLUE + f"Level in {level:.2f}% of capacity" + Style.RESET_ALL)
-
-            if level == 100:
+            self.semaphore.acquire()
+            if self.client.query_variable('Level') >= 100:
                 self.client.update_level_low(False)
                 self.client.update_level_high(True)
-                break
+            self.client.update_open_input_valve(False)
+            self.semaphore.release()
 
+        while self.client.query_variable('Level') > 0:
             time.sleep(1)
 
-        self.semaphore.release()
-
-        while not self.client.read_open_output_valve():
-            time.sleep(1)
-
-        self.semaphore.acquire()
-        time.sleep(1)
-        print("Emptying Tank.")
         while self.client.read_open_output_valve():
-            current_volume -= 10
-            level = (current_volume / TANK_CAPACITY) * 100
-            print(Fore.BLUE + f"Level in {level:.2f}% of capacity" + Style.RESET_ALL)
-
-            if level == 0:
+            self.semaphore.acquire()
+            if self.client.query_variable('Level') <= 0:
                 self.client.update_level_high(False)
                 self.client.update_level_low(True)
-                break
-
-            time.sleep(1)
-
-        self.semaphore.release()
+            self.client.update_open_output_valve(False)
+            self.semaphore.release()
