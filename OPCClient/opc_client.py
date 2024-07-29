@@ -1,8 +1,6 @@
 from opcua import Client
 from opcua import ua
-from colorama import init, Fore, Style
-
-init()
+from colorama import Fore, Style
 
 
 class OPCClient:
@@ -11,7 +9,6 @@ class OPCClient:
         self.server_url = server_url
         self.client = Client(server_url)
         self.variables = {
-            "Init": None,
             "Start_Process": None,
             "Finish_Process": None,
             "Level_High": None,
@@ -89,9 +86,6 @@ class OPCClient:
 
     def query_variable(self, var_name):
         return self.read_variable(var_name)
-
-    def update_init(self, value: bool):
-        self.write_variable("Init", value)
     
     def update_start_process(self, value: bool):
         self.write_variable("Start_Process", value)
@@ -143,9 +137,6 @@ class OPCClient:
 
     def update_reset(self, value: bool):
         self.write_variable("Reset", value)
-
-    def read_init(self):
-        return self.read_variable("Init")
 
     def read_start_process(self):
         return self.read_variable("Start_Process")

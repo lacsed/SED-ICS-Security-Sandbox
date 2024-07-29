@@ -31,4 +31,5 @@ class LevelTransmitter(threading.Thread):
                 self.client.update_level_high(False)
                 self.client.update_level_low(True)
             self.client.update_open_output_valve(False)
+            self.client.update_finish_process(True)
             self.semaphore.release()

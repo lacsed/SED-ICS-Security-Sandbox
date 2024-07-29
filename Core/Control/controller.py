@@ -35,13 +35,13 @@ class Controller(threading.Thread):
         self.server = server
 
     def run(self):
-        controlable_events = ['Start_Process', 'Finish_Process',
-                              'Open_Input_Valve', 'Close_Input_Valve',
+        controlable_events = ['Open_Input_Valve', 'Close_Input_Valve',
                               'Open_Output_Valve', 'Close_Output_Valve',
                               'Control_Temperature_On', 'Control_Temperature_Off',
                               'Mixer_On', 'Mixer_Off', 'Pump_On', 'Pump_Off', 'Reset']
 
-        uncontrolable_events = ['Level_High', 'Level_Low', 'Heated', 'Cooled']
+        uncontrolable_events = ['Level_High', 'Level_Low', 'Heated', 'Cooled',
+                                'Start_Process', 'Finish_Process']
 
         control = DES(controlable_events, controlable_events.__len__(),
                       uncontrolable_events, uncontrolable_events.__len__())
@@ -146,7 +146,7 @@ class Controller(threading.Thread):
             time.sleep(1)
             self.semaphore.release()
 
-        while True:
+        while not self.server.finish_process():
             for supervisor in control.supervisors:
                 for event in controlable_events:
                     if not supervisor.is_disabled(event):
@@ -155,3 +155,5 @@ class Controller(threading.Thread):
             while self.unprocessed_events:
                 event = self.unprocessed_events.popleft()
                 process_event(event)
+
+        print("Process Finished.")

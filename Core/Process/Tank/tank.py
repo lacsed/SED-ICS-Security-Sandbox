@@ -13,7 +13,6 @@ class Tank:
 
     def __init__(self, semaphore, client: OPCClient):
         self.semaphore = semaphore
-        self.tank_empty_event = threading.Event()
         self.client = client
 
         self.fill_tank_thread = self.FillTankThread(self)

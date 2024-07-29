@@ -24,7 +24,6 @@ class OPCServer:
             self.obj = objects.add_object(self.idx, "Tags")
 
             self.variables = {
-                "Init": self.obj.add_variable(self.idx, "Init", False),
                 "Start_Process": self.obj.add_variable(self.idx, "Start_Process", False),
                 "Finish_Process": self.obj.add_variable(self.idx, "Finish_Process", False),
                 "Level_High": self.obj.add_variable(self.idx, "Level_High", False),
@@ -89,9 +88,6 @@ class OPCServer:
     def query_variable(self, var_name: str):
         return self.variables[var_name].get_value()
 
-    def init(self):
-        return self.variables["Init"].get_value()
-
     def start_process(self):
         return self.variables["Start_Process"].get_value()
 
@@ -142,9 +138,6 @@ class OPCServer:
 
     def reset(self):
         return self.variables["Reset"].get_value()
-
-    def update_init(self, value: bool):
-        self.write_variable("Init", value)
 
     def update_start_process(self, value: bool):
         self.write_variable("Start_Process", value)

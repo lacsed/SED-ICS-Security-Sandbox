@@ -82,10 +82,10 @@ if __name__ == "__main__":
             controller.start()
 
             print("System initialized.")
-            controller.server.update_init(True)
+            controller.server.update_start_process(True)
         else:
             print("System restarted.")
-            controller.server.update_init(True)
+            controller.server.update_start_process(True)
 
     def check_response(command):
         if command == 'y':
