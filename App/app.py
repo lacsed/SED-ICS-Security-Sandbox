@@ -68,40 +68,24 @@ if __name__ == "__main__":
     controller = Controller(semaphore, server)
 
     def initialize_system():
-        global system_initialized
-        if not system_initialized:
-            system_initialized = True
-            process.start()
-            tank.start_threads()
-            input_valve.start()
-            output_valve.start()
-            mixer.start()
-            pump.start()
-            temperature_control.start()
-            level_transmitter.start()
-            controller.start()
+        process.start()
+        tank.start_threads()
+        input_valve.start()
+        output_valve.start()
+        mixer.start()
+        pump.start()
+        temperature_control.start()
+        level_transmitter.start()
+        controller.start()
 
-            print("System initialized.")
-            controller.server.update_start_process(True)
-        else:
-            print("System restarted.")
-            controller.server.update_start_process(True)
-
-    def check_response(command):
-        if command == 'y':
-            initialize_system()
-            return True
-        elif command == 'n':
-            raise TerminateProgramException("Terminating the program.")
-        else:
-            print("Invalid response. Please enter 'y' for yes or 'n' for no.")
-            return False
+        print("System initialized.")
+        controller.server.update_finish_process(False)
 
     # Keep the execution of program until a keyboard interruption
-    while True:
+    while not controller.server.finish_process():
         try:
-            response = input("\nInitialize system? (y/n): ").strip().lower()
-            if check_response(response):
+            if controller.server.start_process():
+                initialize_system()
                 time.sleep(1000)
         except TerminateProgramException as e:
             print("Stopping all threads and server...")
@@ -118,3 +102,5 @@ if __name__ == "__main__":
             client_output.disconnect()
             server.stop()
             break
+
+    exit()

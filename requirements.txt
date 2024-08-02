@@ -1,0 +1,11 @@
+colorama==0.4.6
+cryptography==42.0.7
+lxml==5.2.2
+multipledispatch==1.0.0
+opcua==0.98.13
+pip==24.0
+pycparser==2.22
+pytz==2024.1
+setuptools==68.2.0
+six==1.16.0
+wheel==0.41.2

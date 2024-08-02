@@ -147,13 +147,11 @@ class Controller(threading.Thread):
             self.semaphore.release()
 
         while not self.server.finish_process():
-            for supervisor in control.supervisors:
-                for event in controlable_events:
-                    if not supervisor.is_disabled(event):
-                        process_event(event)
-
             while self.unprocessed_events:
                 event = self.unprocessed_events.popleft()
+                process_event(event)
+
+            for event in controlable_events:
                 process_event(event)
 
         print("Process Finished.")

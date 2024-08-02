@@ -8,15 +8,12 @@ class StoppingPumpSupervisor:
 
         def on_enter_state_0():
             supervisor.disable('Pump_Off')
-            supervisor.disable('Finish_Process')
 
         def on_enter_state_1():
             supervisor.enable('Pump_Off')
-            supervisor.enable('Finish_Process')
 
         def on_enter_state_2():
             supervisor.disable('Pump_Off')
-            supervisor.enable('Finish_Process')
 
         state0 = State(0, on_enter=on_enter_state_0)
         state1 = State(1, on_enter=on_enter_state_1)
