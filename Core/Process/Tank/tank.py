@@ -3,7 +3,7 @@ import threading
 import time
 from colorama import Fore, Style
 
-from Configuration.set_points import HEATING_TEMP, INITIAL_TEMP, HEATING_TIME, COOLING_TEMP, COOLING_TIME, TANK_CAPACITY
+from Configuration.set_points import TANK_CAPACITY
 from OPCClient.opc_client import OPCClient
 
 
@@ -24,6 +24,7 @@ class Tank:
         def __init__(self, control):
             super().__init__()
             self.control = control
+            self.location = "Level_Location"
 
         def run(self):
             control = self.control
@@ -53,6 +54,7 @@ class Tank:
         def __init__(self, control):
             super().__init__()
             self.control = control
+            self.location = "Level_Location"
 
         def run(self):
             control = self.control
@@ -82,9 +84,13 @@ class Tank:
         def __init__(self, control):
             super().__init__()
             self.control = control
+            self.location = "Temperature_Location"
 
         def run(self):
             control = self.control
+            heating_temperature = control.client.query_variable('Heating_Temperature')
+            initial_temperature = control.client.query_variable('Initial_Temperature')
+            heating_time = control.client.query_variable('Heating_Time')
 
             while not control.client.read_control_temperature_on():
                 time.sleep(1)
@@ -99,19 +105,19 @@ class Tank:
                 start_time = time.time()
                 current_temperature = control.client.query_variable('Temperature')
 
-                while control.client.query_variable('Temperature') <= HEATING_TEMP:
+                while control.client.query_variable('Temperature') <= heating_temperature:
                     if control.client.read_control_temperature_off():
                         break
 
                     time_elapsed = time.time() - start_time
-                    current_temperature += (HEATING_TEMP - INITIAL_TEMP) * (1 - math.exp(-(time_elapsed / 60) / tau))
+                    current_temperature += (heating_temperature - initial_temperature) * (1 - math.exp(-(time_elapsed / 60) / tau))
                     control.client.update_variable("Temperature", current_temperature)
 
                     print(Fore.RED + f"Temperature set to {current_temperature:.2f}ºC." + Style.RESET_ALL)
 
                 control.semaphore.release()
 
-                time.sleep(HEATING_TIME)
+                time.sleep(heating_time)
                 break
 
             while not control.client.read_control_temperature_off():
@@ -121,11 +127,15 @@ class Tank:
         def __init__(self, control):
             super().__init__()
             self.control = control
+            self.location = "Temperature_Location"
 
         def run(self):
             control = self.control
+            heating_temperature = control.client.query_variable('Heating_Temperature')
+            cooling_temperature = control.client.query_variable('Cooling_Temperature')
+            cooling_time = control.client.query_variable('Cooling_Time')
 
-            while control.client.query_variable('Temperature') < HEATING_TEMP:
+            while control.client.query_variable('Temperature') < heating_temperature:
                 time.sleep(1)
 
             control.semaphore.acquire()
@@ -138,12 +148,12 @@ class Tank:
                 start_time = time.time()
                 current_temperature = control.client.query_variable('Temperature')
 
-                while control.client.query_variable('Temperature') > COOLING_TEMP:
+                while control.client.query_variable('Temperature') > cooling_temperature:
                     if control.client.read_control_temperature_off():
                         break
 
                     time_elapsed = time.time() - start_time
-                    current_temperature = COOLING_TEMP + (current_temperature - COOLING_TEMP) * math.exp(
+                    current_temperature = cooling_temperature + (current_temperature - cooling_temperature) * math.exp(
                         -time_elapsed / (60 * tau))
                     control.client.update_variable("Temperature", current_temperature)
 
@@ -151,7 +161,7 @@ class Tank:
 
                 control.semaphore.release()
 
-                time.sleep(COOLING_TIME)
+                time.sleep(cooling_time)
                 break
 
             while not control.client.read_control_temperature_off():

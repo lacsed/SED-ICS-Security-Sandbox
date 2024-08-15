@@ -10,6 +10,7 @@ class OutputValve(threading.Thread):
         super().__init__()
         self.client = client
         self.output_valve_automaton = OutputValveAutomaton().initialize_automaton_with_client(self.client)
+        self.location = "OutputValve_Location"
 
 
     def run(self):

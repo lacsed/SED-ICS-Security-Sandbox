@@ -2,7 +2,6 @@ import threading
 import time
 from colorama import Fore, Style
 
-from Configuration.set_points import PUMPING_TIME
 from Core.SubSystems.Pump.Automaton.pump_automaton import PumpAutomaton
 from OPCClient.opc_client import OPCClient
 
@@ -13,9 +12,11 @@ class Pump(threading.Thread):
         self.semaphore = semaphore
         self.client = client
         self.pump_automaton = PumpAutomaton().initialize_automaton()
+        self.location = "Pump_Location"
 
     def run(self):
         printer_count = 0
+        pumping_time = self.client.query_variable('Pumping_Time')
 
         while not self.client.read_pump_on():
             self.pump_automaton.trigger('Reset')
@@ -27,7 +28,7 @@ class Pump(threading.Thread):
             time_elapsed = 0
 
             self.semaphore.acquire()
-            while time_elapsed <= PUMPING_TIME:
+            while time_elapsed <= pumping_time:
                 if self.client.read_pump_off():
                     break
 

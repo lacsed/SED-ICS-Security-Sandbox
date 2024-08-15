@@ -9,6 +9,7 @@ class LevelTransmitter(threading.Thread):
         super().__init__()
         self.semaphore = semaphore
         self.client = client
+        self.location = "Level_Location"
 
     def run(self):
         while self.client.query_variable('Level') < 100:

@@ -10,6 +10,7 @@ class InputValve(threading.Thread):
         super().__init__()
         self.client = client
         self.input_valve_automaton = InputValveAutomaton().initialize_automaton()
+        self.location = "InputValve_Location"
 
     def run(self):
         while not self.client.read_open_input_valve():

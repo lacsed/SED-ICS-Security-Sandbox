@@ -1,0 +1,8 @@
+*.pyc
+*.pyo
+*cpython-311.pyc
+__pycache__/
+venv/
+.env/
+.vscode/
+.idea/

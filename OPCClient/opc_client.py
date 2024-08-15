@@ -28,7 +28,22 @@ class OPCClient:
             "Reset": None,
             "Level": None,
             "Temperature": None,
-            "Volume": None
+            "Volume": None,
+            "Mixing_Time": None,
+            "Heating_Time": None,
+            "Cooling_Time": None,
+            "Pumping_Time": None,
+            "Initial_Temperature": None,
+            "Heating_Temperature": None,
+            "Cooling_Temperature": None,
+            "Operation_Mode": None,
+            "Controller_Location": None,
+            "InputValve_Location": None,
+            "OutputValve_Location": None,
+            "Mixer_Location": None,
+            "Temperature_Location": None,
+            "Pump_Location": None,
+            "Level_Location": None
         }
 
     def connect(self):

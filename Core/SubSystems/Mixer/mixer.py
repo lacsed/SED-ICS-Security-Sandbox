@@ -2,7 +2,6 @@ import threading
 import time
 from colorama import Fore, Style
 
-from Configuration.set_points import MIXING_TIME
 from Core.SubSystems.Mixer.Automaton.mixer_automaton import MixerAutomaton
 from OPCClient.opc_client import OPCClient
 
@@ -13,9 +12,11 @@ class Mixer(threading.Thread):
         self.semaphore = semaphore
         self.client = client
         self.mixer_automaton = MixerAutomaton().initialize_automaton()
+        self.location = "Mixer_Location"
 
     def run(self):
         printer_count = 0
+        mixing_time = self.client.query_variable('Mixing_Time')
 
         while not self.client.read_mixer_on():
             self.mixer_automaton.trigger('Reset')
@@ -28,7 +29,7 @@ class Mixer(threading.Thread):
             start_time = time.time()
             time_elapsed = 0
 
-            while time_elapsed <= MIXING_TIME:
+            while time_elapsed <= mixing_time:
                 if self.client.read_mixer_off():
                     break
 

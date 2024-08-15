@@ -1,3 +1,4 @@
 [Group]
-NumFiles=1
+NumFiles=2
 File1=TelaInicial.SCC
+File2=NetworkView.SCC

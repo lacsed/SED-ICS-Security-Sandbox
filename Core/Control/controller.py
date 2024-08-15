@@ -33,6 +33,7 @@ class Controller(threading.Thread):
         self.unprocessed_events = deque()
         self.processed_events = set()
         self.server = server
+        self.location = "Controller_Location"
 
     def run(self):
         controlable_events = ['Open_Input_Valve', 'Close_Input_Valve',

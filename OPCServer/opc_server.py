@@ -1,7 +1,8 @@
 from datetime import datetime
 from opcua import Server
 
-from Configuration.set_points import INITIAL_TEMP
+from Configuration.set_points import INITIAL_TEMP, MIXING_TIME, HEATING_TIME, COOLING_TIME, PUMPING_TIME, HEATING_TEMP, \
+    COOLING_TEMP
 
 
 class OPCServer:
@@ -43,7 +44,22 @@ class OPCServer:
                 "Reset": self.obj.add_variable(self.idx, "Reset", False),
                 "Level": self.obj.add_variable(self.idx, "Level", 0),
                 "Temperature": self.obj.add_variable(self.idx, "Temperature", INITIAL_TEMP),
-                "Volume": self.obj.add_variable(self.idx, "Volume", 0)
+                "Volume": self.obj.add_variable(self.idx, "Volume", 0),
+                "Mixing_Time": self.obj.add_variable(self.idx, "Mixing_Time", MIXING_TIME),
+                "Heating_Time": self.obj.add_variable(self.idx, "Heating_Time", HEATING_TIME),
+                "Cooling_Time": self.obj.add_variable(self.idx, "Cooling_Time", COOLING_TIME),
+                "Pumping_Time": self.obj.add_variable(self.idx, "Pumping_Time", PUMPING_TIME),
+                "Initial_Temperature": self.obj.add_variable(self.idx, "Initial_Temperature", INITIAL_TEMP),
+                "Heating_Temperature": self.obj.add_variable(self.idx, "Heating_Temperature", HEATING_TEMP),
+                "Cooling_Temperature": self.obj.add_variable(self.idx, "Cooling_Temperature", COOLING_TEMP),
+                "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", False),
+                "Controller_Location": self.obj.add_variable(self.idx, "Controller_Location", 0),
+                "InputValve_Location": self.obj.add_variable(self.idx, "InputValve_Location", 0),
+                "OutputValve_Location": self.obj.add_variable(self.idx, "OutputValve_Location", 0),
+                "Mixer_Location": self.obj.add_variable(self.idx, "Mixer_Location", 0),
+                "Temperature_Location": self.obj.add_variable(self.idx, "Temperature_Location", 0),
+                "Pump_Location": self.obj.add_variable(self.idx, "Pump_Location", 0),
+                "Level_Location": self.obj.add_variable(self.idx, "Level_Location", 0)
             }
 
             for var in self.variables.values():
