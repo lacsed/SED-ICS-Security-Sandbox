@@ -37,13 +37,10 @@ class OPCClient:
             "Heating_Temperature": None,
             "Cooling_Temperature": None,
             "Operation_Mode": None,
-            "Controller_Location": None,
-            "InputValve_Location": None,
-            "OutputValve_Location": None,
-            "Mixer_Location": None,
-            "Temperature_Location": None,
-            "Pump_Location": None,
-            "Level_Location": None
+            "Attack_Type": "",
+            "Attack_Event": "",
+            "Processed_Events": None,
+            "Unprocessed_Events": None
         }
 
     def connect(self):
@@ -64,8 +61,8 @@ class OPCClient:
         except Exception as e:
             print(Fore.LIGHTRED_EX + "Error disconnecting OPC UA client:", e, Style.RESET_ALL)
 
-    def write_variable(self, var_type, value):
-        if var_type in self.variables:
+    def write_variable(self, var_name, value):
+        if var_name in self.variables:
             try:
                 if isinstance(value, bool):
                     variant_type = ua.VariantType.Boolean
@@ -73,15 +70,19 @@ class OPCClient:
                     variant_type = ua.VariantType.Int32
                 elif isinstance(value, float):
                     variant_type = ua.VariantType.Float
+                elif isinstance(value, str):
+                    variant_type = ua.VariantType.String
+                elif isinstance(value, list):
+                    variant_type = ua.VariantType.String  # Para listas de strings
                 else:
                     raise ValueError(f"Unsupported variable type: {type(value)}")
 
-                self.variables[var_type].set_value(ua.Variant(value, variant_type))
-                print(Fore.YELLOW + f"Variable '{var_type}' written successfully." + Style.RESET_ALL)
+                self.variables[var_name].set_value(ua.Variant(value, variant_type))
+                print(Fore.YELLOW + f"Variable '{var_name}' written successfully." + Style.RESET_ALL)
             except Exception as e:
-                print(Fore.LIGHTRED_EX + f"Error writing variable '{var_type}': {e}" + Style.RESET_ALL)
+                print(Fore.LIGHTRED_EX + f"Error writing variable '{var_name}': {e}" + Style.RESET_ALL)
         else:
-            print(Fore.LIGHTRED_EX + f"Variable type '{var_type}' not found." + Style.RESET_ALL)
+            print(Fore.LIGHTRED_EX + f"Variable '{var_name}' not found." + Style.RESET_ALL)
 
     def read_variable(self, var_type):
         if var_type in self.variables:
@@ -96,12 +97,69 @@ class OPCClient:
         else:
             print(Fore.LIGHTRED_EX + f"Variable type '{var_type}' not found." + Style.RESET_ALL)
 
+    def add_to_list_variable(self, var_name, value):
+        try:
+            current_value = self.read_variable(var_name)
+            if isinstance(current_value, list):
+                current_value.append(value)
+                self.write_variable(var_name, current_value)
+                print(Fore.YELLOW + f"Value '{value}' added to '{var_name}' successfully." + Style.RESET_ALL)
+            else:
+                print(Fore.LIGHTRED_EX + f"Variable '{var_name}' is not a list." + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + f"Error adding value to list variable '{var_name}':", e, Style.RESET_ALL)
+
+    def remove_from_list_variable(self, var_name, value):
+        try:
+            current_value = self.read_variable(var_name)
+            if isinstance(current_value, list):
+                if value in current_value:
+                    current_value.remove(value)
+                    self.write_variable(var_name, current_value)
+                    print(Fore.YELLOW + f"Value '{value}' removed from '{var_name}' successfully." + Style.RESET_ALL)
+                else:
+                    print(Fore.LIGHTRED_EX + f"Value '{value}' not found in '{var_name}'." + Style.RESET_ALL)
+            else:
+                print(Fore.LIGHTRED_EX + f"Variable '{var_name}' is not a list." + Style.RESET_ALL)
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + f"Error removing value from list variable '{var_name}':", e, Style.RESET_ALL)
+
+    def query_list_variable(self, var_name):
+        try:
+            current_value = self.read_variable(var_name)
+            if isinstance(current_value, list):
+                return current_value
+            else:
+                print(Fore.LIGHTRED_EX + f"Variable '{var_name}' is not a list." + Style.RESET_ALL)
+                return None
+        except Exception as e:
+            print(Fore.LIGHTRED_EX + f"Error querying list variable '{var_name}':", e, Style.RESET_ALL)
+            return None
+
     def update_variable(self, var_name, value):
         self.write_variable(var_name, value)
 
     def query_variable(self, var_name):
         return self.read_variable(var_name)
-    
+
+    def add_to_processed_events(self, event):
+        self.add_to_list_variable("Processed_Events", event)
+
+    def remove_from_processed_events(self, event):
+        self.remove_from_list_variable("Processed_Events", event)
+
+    def query_processed_events(self):
+        return self.query_list_variable("Processed_Events")
+
+    def add_to_unprocessed_events(self, event):
+        self.add_to_list_variable("Unprocessed_Events", event)
+
+    def remove_from_unprocessed_events(self, event):
+        self.remove_from_list_variable("Unprocessed_Events", event)
+
+    def query_unprocessed_events(self):
+        return self.query_list_variable("Unprocessed_Events")
+
     def update_start_process(self, value: bool):
         self.write_variable("Start_Process", value)
 

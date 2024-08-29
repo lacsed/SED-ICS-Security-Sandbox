@@ -4,6 +4,7 @@ from collections import deque
 
 from colorama import Fore, Style
 
+from Atacker.attacker import Attacker
 from Core.Control.DES.DES import DES
 from Core.SubSystems.InputValve.Automaton.input_valve_automaton import InputValveAutomaton
 from Core.SubSystems.InputValve.Supervisors.close_input_valve_supervisor import CloseInputValveSupervisor
@@ -30,8 +31,6 @@ class Controller(threading.Thread):
     def __init__(self, semaphore, server: OPCServer):
         super().__init__()
         self.semaphore = semaphore
-        self.unprocessed_events = deque()
-        self.processed_events = set()
         self.server = server
         self.location = "Controller_Location"
 
@@ -111,11 +110,13 @@ class Controller(threading.Thread):
                             sup.trigger(uncontrolable_event)
 
         def process_event(current_event):
-            if current_event in self.processed_events:
+            processed_events = set(self.server.query_processed_events())
+
+            if current_event in processed_events:
                 return
 
             possible_plants = [plant for plant in control.plants if plant.is_defined(event)]
-            time.sleep(1)
+            time.sleep(0.01)
 
             event_processed = False
             for plant in possible_plants:
@@ -123,33 +124,30 @@ class Controller(threading.Thread):
                     if any(sup.is_disabled(current_event) for sup in control.supervisors):
                         print(f"Event {event} is disabled by a supervisor and cannot be triggered.")
                     else:
-                        self.semaphore.acquire()
-
                         plant.trigger(current_event)
                         control.trigger_supervisors(current_event)
                         control.update_des()
                         self.server.update_variable(current_event, True)
-                        time.sleep(1)
+                        time.sleep(0.01)
                         print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' executed successfully." + Style.RESET_ALL)
-
-                        self.semaphore.release()
-                        self.processed_events.add(current_event)
+                        self.server.add_to_processed_events(current_event)
                         event_processed = True
                         break
                 else:
                     print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' is not feasible in the current state of the plant '{plant.name}'." + Style.RESET_ALL)
 
             if not event_processed:
-                self.unprocessed_events.append(current_event)
+                self.server.add_to_unprocessed_events(current_event)
 
             self.semaphore.acquire()
             process_uncontrolable_events()
-            time.sleep(1)
+            time.sleep(0.01)
             self.semaphore.release()
 
         while not self.server.finish_process():
-            while self.unprocessed_events:
-                event = self.unprocessed_events.popleft()
+            unprocessed_events = deque(self.server.query_unprocessed_events())
+            while unprocessed_events:
+                event = unprocessed_events.popleft()
                 process_event(event)
 
             for event in controlable_events:

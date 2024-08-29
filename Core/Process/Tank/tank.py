@@ -11,8 +11,7 @@ class Tank:
     R = 10
     C = 0.1
 
-    def __init__(self, semaphore, client: OPCClient):
-        self.semaphore = semaphore
+    def __init__(self, client: OPCClient):
         self.client = client
 
         self.fill_tank_thread = self.FillTankThread(self)
@@ -33,7 +32,6 @@ class Tank:
             while not control.client.read_open_input_valve():
                 time.sleep(1)
 
-            control.semaphore.acquire()
             time.sleep(1)
             print("Filling Tank.")
 
@@ -45,7 +43,6 @@ class Tank:
                 print(Fore.BLUE + f"Level in {level:.2f}% of capacity" + Style.RESET_ALL)
 
                 if level == 100:
-                    control.semaphore.release()
                     break
 
                 time.sleep(1)
@@ -62,7 +59,6 @@ class Tank:
             while not control.client.read_open_output_valve():
                 time.sleep(1)
 
-            control.semaphore.acquire()
             time.sleep(1)
             print("Emptying Tank.")
             current_volume = control.client.query_variable('Volume')
@@ -75,7 +71,6 @@ class Tank:
                 print(Fore.BLUE + f"Level in {level:.2f}% of capacity" + Style.RESET_ALL)
 
                 if level == 0:
-                    control.semaphore.release()
                     break
 
                 time.sleep(1)
@@ -95,7 +90,6 @@ class Tank:
             while not control.client.read_control_temperature_on():
                 time.sleep(1)
 
-            control.semaphore.acquire()
             print(Fore.RED + "Heating Tank." + Style.RESET_ALL)
             time.sleep(1)
 
@@ -115,13 +109,9 @@ class Tank:
 
                     print(Fore.RED + f"Temperature set to {current_temperature:.2f}ºC." + Style.RESET_ALL)
 
-                control.semaphore.release()
-
                 time.sleep(heating_time)
                 break
 
-            while not control.client.read_control_temperature_off():
-                time.sleep(1)
 
     class CoolingThread(threading.Thread):
         def __init__(self, control):
@@ -138,7 +128,6 @@ class Tank:
             while control.client.query_variable('Temperature') < heating_temperature:
                 time.sleep(1)
 
-            control.semaphore.acquire()
             print(Fore.RED + "Cooling Tank." + Style.RESET_ALL)
             time.sleep(1)
 
@@ -159,13 +148,8 @@ class Tank:
 
                     print(Fore.RED + f"Temperature set to {current_temperature:.2f}ºC." + Style.RESET_ALL)
 
-                control.semaphore.release()
-
                 time.sleep(cooling_time)
                 break
-
-            while not control.client.read_control_temperature_off():
-                time.sleep(1)
 
     def start_threads(self):
         self.fill_tank_thread.start()

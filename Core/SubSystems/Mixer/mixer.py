@@ -7,9 +7,8 @@ from OPCClient.opc_client import OPCClient
 
 
 class Mixer(threading.Thread):
-    def __init__(self, semaphore, client: OPCClient):
+    def __init__(self, client: OPCClient):
         super().__init__()
-        self.semaphore = semaphore
         self.client = client
         self.mixer_automaton = MixerAutomaton().initialize_automaton()
         self.location = "Mixer_Location"
@@ -24,8 +23,6 @@ class Mixer(threading.Thread):
 
         self.mixer_automaton.trigger('Mixer_On')
         while self.client.read_mixer_on():
-            self.semaphore.acquire()
-
             start_time = time.time()
             time_elapsed = 0
 
@@ -42,7 +39,6 @@ class Mixer(threading.Thread):
 
             self.client.update_mixer_on(False)
             time.sleep(1)
-            self.semaphore.release()
 
         if self.client.read_mixer_off():
             self.mixer_automaton.trigger('Mixer_Off')

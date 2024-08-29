@@ -1,5 +1,4 @@
-from datetime import datetime
-from opcua import Server
+from opcua import Server, ua
 
 from Configuration.set_points import INITIAL_TEMP, MIXING_TIME, HEATING_TIME, COOLING_TIME, PUMPING_TIME, HEATING_TEMP, \
     COOLING_TEMP
@@ -53,13 +52,12 @@ class OPCServer:
                 "Heating_Temperature": self.obj.add_variable(self.idx, "Heating_Temperature", HEATING_TEMP),
                 "Cooling_Temperature": self.obj.add_variable(self.idx, "Cooling_Temperature", COOLING_TEMP),
                 "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", False),
-                "Controller_Location": self.obj.add_variable(self.idx, "Controller_Location", 0),
-                "InputValve_Location": self.obj.add_variable(self.idx, "InputValve_Location", 0),
-                "OutputValve_Location": self.obj.add_variable(self.idx, "OutputValve_Location", 0),
-                "Mixer_Location": self.obj.add_variable(self.idx, "Mixer_Location", 0),
-                "Temperature_Location": self.obj.add_variable(self.idx, "Temperature_Location", 0),
-                "Pump_Location": self.obj.add_variable(self.idx, "Pump_Location", 0),
-                "Level_Location": self.obj.add_variable(self.idx, "Level_Location", 0)
+                "Attack_Type": self.obj.add_variable(self.idx, "Attack_Type", None),
+                "Attack_Event": self.obj.add_variable(self.idx, "Attack_Event", None),
+                "Processed_Events": self.obj.add_variable(self.idx, "Processed_Events",
+                                                          ua.Variant([], ua.VariantType.String)),
+                "Unprocessed_Events": self.obj.add_variable(self.idx, "Unprocessed_Events",
+                                                            ua.Variant([], ua.VariantType.String)),
             }
 
             for var in self.variables.values():
@@ -81,28 +79,86 @@ class OPCServer:
             if variable is not None:
                 variable.set_value(value)
                 print(f"Variable '{var_name}' written successfully.")
-                self.log_message(var_name, value)
             else:
                 print(f"Variable '{var_name}' not found.")
         except Exception as e:
             print("Error writing variable:", e)
 
-    def log_message(self, name, value):
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        message = {"name": name, "value": value, "timestamp": timestamp}
-        self.message_log.append(message)
+    def add_to_list_variable(self, var_name, value):
+        try:
+            variable = self.variables.get(var_name, None)
+            if variable is not None:
+                current_value = variable.get_value()
+                if isinstance(current_value, list):
+                    current_value.append(value)
+                    variable.set_value(current_value)
+                    print(f"Value '{value}' added to '{var_name}' successfully.")
+                else:
+                    print(f"Variable '{var_name}' is not a list.")
+            else:
+                print(f"Variable '{var_name}' not found.")
+        except Exception as e:
+            print(f"Error adding value to list variable '{var_name}':", e)
 
-    def remove_messages(self, num_messages):
-        if num_messages <= len(self.message_log):
-            self.message_log = self.message_log[:-num_messages]
-        else:
-            print("There are not enough messages to remove.")
+    def remove_from_list_variable(self, var_name, value):
+        try:
+            variable = self.variables.get(var_name, None)
+            if variable is not None:
+                current_value = variable.get_value()
+                if isinstance(current_value, list):
+                    if value in current_value:
+                        current_value.remove(value)
+                        variable.set_value(current_value)
+                        print(f"Value '{value}' removed from '{var_name}' successfully.")
+                    else:
+                        print(f"Value '{value}' not found in '{var_name}'.")
+                else:
+                    print(f"Variable '{var_name}' is not a list.")
+            else:
+                print(f"Variable '{var_name}' not found.")
+        except Exception as e:
+            print(f"Error removing value from list variable '{var_name}':", e)
+
+    def query_list_variable(self, var_name):
+        try:
+            variable = self.variables.get(var_name, None)
+            if variable is not None:
+                current_value = variable.get_value()
+                if isinstance(current_value, list):
+                    return current_value
+                else:
+                    print(f"Variable '{var_name}' is not a list.")
+                    return None
+            else:
+                print(f"Variable '{var_name}' not found.")
+                return None
+        except Exception as e:
+            print(f"Error querying list variable '{var_name}':", e)
+            return None
 
     def update_variable(self, var_name: str, value):
         self.write_variable(var_name, value)
 
     def query_variable(self, var_name: str):
         return self.variables[var_name].get_value()
+
+    def add_to_processed_events(self, event):
+        self.add_to_list_variable("Processed_Events", event)
+
+    def remove_from_processed_events(self, event):
+        self.remove_from_list_variable("Processed_Events", event)
+
+    def query_processed_events(self):
+        return self.query_list_variable("Processed_Events")
+
+    def add_to_unprocessed_events(self, event):
+        self.add_to_list_variable("Unprocessed_Events", event)
+
+    def remove_from_unprocessed_events(self, event):
+        self.remove_from_list_variable("Unprocessed_Events", event)
+
+    def query_unprocessed_events(self):
+        return self.query_list_variable("Unprocessed_Events")
 
     def start_process(self):
         return self.variables["Start_Process"].get_value()

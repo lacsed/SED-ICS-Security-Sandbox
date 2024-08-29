@@ -7,9 +7,8 @@ from OPCClient.opc_client import OPCClient
 
 
 class Pump(threading.Thread):
-    def __init__(self, semaphore, client: OPCClient):
+    def __init__(self, client: OPCClient):
         super().__init__()
-        self.semaphore = semaphore
         self.client = client
         self.pump_automaton = PumpAutomaton().initialize_automaton()
         self.location = "Pump_Location"
@@ -27,7 +26,6 @@ class Pump(threading.Thread):
             start_time = time.time()
             time_elapsed = 0
 
-            self.semaphore.acquire()
             while time_elapsed <= pumping_time:
                 if self.client.read_pump_off():
                     break
@@ -41,7 +39,6 @@ class Pump(threading.Thread):
 
             self.client.update_pump_on(False)
             time.sleep(1)
-            self.semaphore.release()
 
         if self.client.read_pump_off():
             self.pump_automaton.trigger('Pump_Off')

@@ -6,9 +6,8 @@ from OPCClient.opc_client import OPCClient
 
 
 class TemperatureControl(threading.Thread):
-    def __init__(self, semaphore, client: OPCClient):
+    def __init__(self, client: OPCClient):
         super().__init__()
-        self.semaphore = semaphore
         self.client = client
         self.temperature_control_automaton = TemperatureControlAutomaton().initialize_automaton()
         self.location = "Temperature_Location"
@@ -24,8 +23,7 @@ class TemperatureControl(threading.Thread):
         if self.client.read_control_temperature_on():
             self.temperature_control_automaton.trigger('Control_Temperature_On')
 
-        while self.client.read_control_temperature_on():
-            self.semaphore.acquire()
+        while not self.client.read_control_temperature_off():
             if self.client.query_variable('Temperature') >= heating_temperature:
                 self.client.update_cooled(False)
                 self.client.update_heated(True)
@@ -33,11 +31,7 @@ class TemperatureControl(threading.Thread):
                 if self.client.query_variable('Temperature') <= cooling_temperature:
                     self.client.update_cooled(True)
                     self.client.update_heated(False)
-            self.semaphore.release()
-
-
-        while not self.client.read_control_temperature_off():
-            time.sleep(1)
 
         if self.client.read_control_temperature_off():
+            self.client.update_control_temperature_on(False)
             self.temperature_control_automaton.trigger('Control_Temperature_Off')

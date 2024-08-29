@@ -1,6 +1,7 @@
 import threading
 import time
 
+from Atacker.attacker import Attacker
 from Core.Control.controller import Controller
 from Core.Process.Tank.tank import Tank
 from Core.SubSystems.InputValve.input_valve import InputValve
@@ -32,7 +33,7 @@ if __name__ == "__main__":
     # Connect tank plant client
     tank_client = OPCClient()
     tank_client.connect()
-    tank = Tank(semaphore, process_client)
+    tank = Tank(process_client)
 
     # Connect input valve client
     client_input = OPCClient()
@@ -47,25 +48,28 @@ if __name__ == "__main__":
     # Connect level transmitter client
     client_level_transmitter = OPCClient()
     client_level_transmitter.connect()
-    level_transmitter = LevelTransmitter(semaphore, client_level_transmitter)
+    level_transmitter = LevelTransmitter(client_level_transmitter)
 
     # Connect mixer client
     client_mixer = OPCClient()
     client_mixer.connect()
-    mixer = Mixer(semaphore, client_mixer)
+    mixer = Mixer(client_mixer)
 
     # Connect pump client
     client_pump = OPCClient()
     client_pump.connect()
-    pump = Pump(semaphore, client_pump)
+    pump = Pump(client_pump)
 
     # Connect temperature control client
     client_temperature_control = OPCClient()
     client_temperature_control.connect()
-    temperature_control = TemperatureControl(semaphore, client_temperature_control)
+    temperature_control = TemperatureControl(client_temperature_control)
 
     # Initialize controller
     controller = Controller(semaphore, server)
+
+    # Initialize attacker
+    attacker = Attacker(semaphore, server)
 
     def initialize_system():
         process.start()
