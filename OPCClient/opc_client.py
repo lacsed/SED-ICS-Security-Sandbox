@@ -2,6 +2,8 @@ from opcua import Client
 from opcua import ua
 from colorama import Fore, Style
 
+from Tools.mapper import get_attack_number, get_event_name
+
 
 class OPCClient:
     def __init__(self, server_url="opc.tcp://localhost:4840/freeopcua/server/"):
@@ -29,10 +31,8 @@ class OPCClient:
             "Level": None,
             "Temperature": None,
             "Volume": None,
-            "Mixing_Time": None,
             "Heating_Time": None,
             "Cooling_Time": None,
-            "Pumping_Time": None,
             "Initial_Temperature": None,
             "Heating_Temperature": None,
             "Cooling_Temperature": None,
@@ -40,7 +40,10 @@ class OPCClient:
             "Attack_Type": "",
             "Attack_Event": "",
             "Processed_Events": None,
-            "Unprocessed_Events": None
+            "Unprocessed_Events": None,
+            "Stop_Process": None,
+            "Reset_Process": None,
+            "Under_Attack": False
         }
 
     def connect(self):
@@ -166,6 +169,12 @@ class OPCClient:
     def update_finish_process(self, value: bool):
         self.write_variable("Finish_Process", value)
 
+    def update_stop_process(self, value: bool):
+        self.write_variable("Stop_Process", value)
+
+    def update_reset_process(self, value: bool):
+        self.write_variable("Reset_Process", value)
+
     def update_level_high(self, value: bool):
         self.write_variable("Level_High", value)
 
@@ -217,6 +226,36 @@ class OPCClient:
     def read_finish_process(self):
         return self.read_variable("Finish_Process")
 
+    def read_stop_process(self):
+        return self.read_variable("Stop_Process")
+
+    def read_reset_process(self):
+        return self.read_variable("Reset_Process")
+
+    def read_under_attack(self):
+        return self.read_variable("Under_Attack")
+
+    def get_attack_type(self):
+        return self.read_variable("Attack_Type")
+
+    def get_attack_event(self):
+        return get_event_name(self.read_variable("Attack_Event"))
+
+    def deny_attack(self):
+        return self.read_variable("Attack_Type") == 0
+
+    def host_and_watch_attack(self):
+        return self.read_variable("Attack_Type") == 1
+
+    def insert_attack(self):
+        return self.read_variable("Attack_Type") == 2
+
+    def intercept_attack(self):
+        return self.read_variable("Attack_Type") == 3
+
+    def stealth_insert_attack(self):
+        return self.read_variable("Attack_Type") == 4
+
     def read_level_high(self):
         return self.read_variable("Level_High")
 
@@ -261,3 +300,11 @@ class OPCClient:
 
     def read_reset(self):
         return self.read_variable("Reset")
+
+    def released_by_attack(self, attack_type, attack_event):
+        return (self.query_variable('Attack_Type') != attack_type
+                or self.query_variable('Attack_Event') != get_attack_number(attack_event))
+
+    def block_by_attack(self, attack_type, attack_event):
+        return (self.query_variable('Attack_Type') == attack_type
+                and self.query_variable('Attack_Event') == get_attack_number(attack_event))

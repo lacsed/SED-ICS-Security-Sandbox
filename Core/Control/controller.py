@@ -4,7 +4,7 @@ from collections import deque
 
 from colorama import Fore, Style
 
-from Atacker.attacker import Attacker
+from Attacker.attacker import Attacker
 from Core.Control.DES.DES import DES
 from Core.SubSystems.InputValve.Automaton.input_valve_automaton import InputValveAutomaton
 from Core.SubSystems.InputValve.Supervisors.close_input_valve_supervisor import CloseInputValveSupervisor
@@ -96,6 +96,9 @@ class Controller(threading.Thread):
         temperature_control_automaton = TemperatureControlAutomaton().initialize_automaton()
         control.add_plant(temperature_control_automaton)
 
+        # Attacker
+        attacker = Attacker(self.server)
+
         control.update_des()
         control.supervisor_states()
 
@@ -110,6 +113,12 @@ class Controller(threading.Thread):
                             sup.trigger(uncontrolable_event)
 
         def process_event(current_event):
+            # Process attack
+            if self.server.under_attack() and self.server.intercept_attack():
+                attacker.attacker_handler()
+                self.server.update_under_attack(False)
+            if self.server.under_attack() and self.server.host_and_watch_attack():
+                attacker.attacker_handler()
             processed_events = set(self.server.query_processed_events())
 
             if current_event in processed_events:
@@ -128,6 +137,9 @@ class Controller(threading.Thread):
                         control.trigger_supervisors(current_event)
                         control.update_des()
                         self.server.update_variable(current_event, True)
+                        # Process attack
+                        if self.server.under_attack() and self.server.deny_attack():
+                            attacker.attacker_handler()
                         time.sleep(0.01)
                         print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' executed successfully." + Style.RESET_ALL)
                         self.server.add_to_processed_events(current_event)
@@ -146,7 +158,12 @@ class Controller(threading.Thread):
 
         while not self.server.finish_process():
             unprocessed_events = deque(self.server.query_unprocessed_events())
+
             while unprocessed_events:
+                # Process attack
+                if self.server.under_attack() and self.server.insert_attack():
+                    attacker.attacker_handler()
+                    self.server.update_under_attack(False)
                 event = unprocessed_events.popleft()
                 process_event(event)
 

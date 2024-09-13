@@ -15,7 +15,6 @@ class Mixer(threading.Thread):
 
     def run(self):
         printer_count = 0
-        mixing_time = self.client.query_variable('Mixing_Time')
 
         while not self.client.read_mixer_on():
             self.mixer_automaton.trigger('Reset')
@@ -23,22 +22,13 @@ class Mixer(threading.Thread):
 
         self.mixer_automaton.trigger('Mixer_On')
         while self.client.read_mixer_on():
-            start_time = time.time()
-            time_elapsed = 0
+            if self.client.read_heated():
+                break
 
-            while time_elapsed <= mixing_time:
-                if self.client.read_mixer_off():
-                    break
+            printer_count += 1
+            if printer_count == 150:
+                print(Fore.CYAN + f"Mixing tank." + Style.RESET_ALL)
+                printer_count = 0
 
-                time_elapsed = time.time() - start_time
-                printer_count += 1
-
-                if printer_count == 150:
-                    print(Fore.CYAN + f"Mixing tank." + Style.RESET_ALL)
-                    printer_count = 0
-
-            self.client.update_mixer_on(False)
-            time.sleep(1)
-
-        if self.client.read_mixer_off():
-            self.mixer_automaton.trigger('Mixer_Off')
+        self.client.update_mixer_on(False)
+        self.mixer_automaton.trigger('Mixer_Off')

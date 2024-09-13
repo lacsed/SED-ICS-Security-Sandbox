@@ -81,6 +81,15 @@ class Tank:
             self.control = control
             self.location = "Temperature_Location"
 
+        def get_tau_value(self):
+            R = 5
+            C = 0.05
+            if self.control.read_mixer_on():
+                R = 10
+                C = 0.1
+
+            return R * C
+
         def run(self):
             control = self.control
             heating_temperature = control.client.query_variable('Heating_Temperature')
@@ -94,22 +103,20 @@ class Tank:
             time.sleep(1)
 
             while control.client.read_control_temperature_on():
-                tau = control.R * control.C
-
                 start_time = time.time()
+                time_elapsed = 0
                 current_temperature = control.client.query_variable('Temperature')
 
-                while control.client.query_variable('Temperature') <= heating_temperature:
+                while time_elapsed < heating_time:
                     if control.client.read_control_temperature_off():
                         break
-
-                    time_elapsed = time.time() - start_time
-                    current_temperature += (heating_temperature - initial_temperature) * (1 - math.exp(-(time_elapsed / 60) / tau))
-                    control.client.update_variable("Temperature", current_temperature)
+                    if current_temperature < heating_temperature:
+                        time_elapsed = time.time() - start_time
+                        current_temperature += (heating_temperature - initial_temperature) * (1 - math.exp(-(time_elapsed / 60) / (control.R * control.C)))
+                        control.client.update_variable("Temperature", current_temperature)
 
                     print(Fore.RED + f"Temperature set to {current_temperature:.2f}ºC." + Style.RESET_ALL)
 
-                time.sleep(heating_time)
                 break
 
 
@@ -118,6 +125,16 @@ class Tank:
             super().__init__()
             self.control = control
             self.location = "Temperature_Location"
+
+        def get_tau_value(self):
+            if self.control.read_pump_on():
+                R = 1
+                C = 0.01
+            else:
+                R = 1
+                C = 0.1
+
+            return R * C
 
         def run(self):
             control = self.control
@@ -132,23 +149,22 @@ class Tank:
             time.sleep(1)
 
             while control.client.read_control_temperature_on():
-                tau = 1 * 0.01
-
                 start_time = time.time()
+                time_elapsed = 0
                 current_temperature = control.client.query_variable('Temperature')
 
-                while control.client.query_variable('Temperature') > cooling_temperature:
+                tau = 2 * 0.02
+
+                while time_elapsed < cooling_time:
                     if control.client.read_control_temperature_off():
                         break
-
-                    time_elapsed = time.time() - start_time
-                    current_temperature = cooling_temperature + (current_temperature - cooling_temperature) * math.exp(
-                        -time_elapsed / (60 * tau))
-                    control.client.update_variable("Temperature", current_temperature)
+                    if current_temperature > cooling_temperature:
+                        time_elapsed = time.time() - start_time
+                        current_temperature = cooling_temperature + (current_temperature - cooling_temperature) * math.exp(-time_elapsed / (60 * tau))
+                        control.client.update_variable("Temperature", current_temperature)
 
                     print(Fore.RED + f"Temperature set to {current_temperature:.2f}ºC." + Style.RESET_ALL)
 
-                time.sleep(cooling_time)
                 break
 
     def start_threads(self):

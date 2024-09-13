@@ -1,7 +1,6 @@
 from opcua import Server, ua
 
-from Configuration.set_points import INITIAL_TEMP, MIXING_TIME, HEATING_TIME, COOLING_TIME, PUMPING_TIME, HEATING_TEMP, \
-    COOLING_TEMP
+from Configuration.set_points import INITIAL_TEMP, HEATING_TIME, COOLING_TIME, HEATING_TEMP, COOLING_TEMP
 
 
 class OPCServer:
@@ -44,20 +43,22 @@ class OPCServer:
                 "Level": self.obj.add_variable(self.idx, "Level", 0),
                 "Temperature": self.obj.add_variable(self.idx, "Temperature", INITIAL_TEMP),
                 "Volume": self.obj.add_variable(self.idx, "Volume", 0),
-                "Mixing_Time": self.obj.add_variable(self.idx, "Mixing_Time", MIXING_TIME),
                 "Heating_Time": self.obj.add_variable(self.idx, "Heating_Time", HEATING_TIME),
                 "Cooling_Time": self.obj.add_variable(self.idx, "Cooling_Time", COOLING_TIME),
-                "Pumping_Time": self.obj.add_variable(self.idx, "Pumping_Time", PUMPING_TIME),
                 "Initial_Temperature": self.obj.add_variable(self.idx, "Initial_Temperature", INITIAL_TEMP),
                 "Heating_Temperature": self.obj.add_variable(self.idx, "Heating_Temperature", HEATING_TEMP),
                 "Cooling_Temperature": self.obj.add_variable(self.idx, "Cooling_Temperature", COOLING_TEMP),
                 "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", False),
-                "Attack_Type": self.obj.add_variable(self.idx, "Attack_Type", None),
-                "Attack_Event": self.obj.add_variable(self.idx, "Attack_Event", None),
+                "Attack_Type": self.obj.add_variable(self.idx, "Attack_Type", 0),
+                "Attack_Event": self.obj.add_variable(self.idx, "Attack_Event", 0),
                 "Processed_Events": self.obj.add_variable(self.idx, "Processed_Events",
                                                           ua.Variant([], ua.VariantType.String)),
                 "Unprocessed_Events": self.obj.add_variable(self.idx, "Unprocessed_Events",
                                                             ua.Variant([], ua.VariantType.String)),
+                "Stop_Process": self.obj.add_variable(self.idx, "Stop_Process", False),
+                "Reset_Process": self.obj.add_variable(self.idx, "Reset_Process", False),
+                "Under_Attack": self.obj.add_variable(self.idx, "Under_Attack", False),
+                "Release_Attack": self.obj.add_variable(self.idx, "Release_Attack", True)
             }
 
             for var in self.variables.values():
@@ -136,6 +137,52 @@ class OPCServer:
             print(f"Error querying list variable '{var_name}':", e)
             return None
 
+    def reset_variables(self):
+        if self.variables is None:
+            print("Error: 'self.variables' is not initialized.")
+            return
+
+        initial_values = {
+            "Start_Process": False,
+            "Finish_Process": False,
+            "Level_High": False,
+            "Level_Low": False,
+            "Open_Input_Valve": False,
+            "Close_Input_Valve": False,
+            "Open_Output_Valve": False,
+            "Close_Output_Valve": False,
+            "Heated": False,
+            "Cooled": False,
+            "Control_Temperature_On": False,
+            "Control_Temperature_Off": False,
+            "Mixer_On": False,
+            "Mixer_Off": False,
+            "Pump_On": False,
+            "Pump_Off": False,
+            "Reset": False,
+            "Level": 0,
+            "Temperature": INITIAL_TEMP,
+            "Volume": 0,
+            "Heating_Time": HEATING_TIME,
+            "Cooling_Time": COOLING_TIME,
+            "Initial_Temperature": INITIAL_TEMP,
+            "Heating_Temperature": HEATING_TEMP,
+            "Cooling_Temperature": COOLING_TEMP,
+            "Operation_Mode": False,
+            "Attack_Type": None,
+            "Attack_Event": None,
+            "Processed_Events": ua.Variant([], ua.VariantType.String),
+            "Unprocessed_Events": ua.Variant([], ua.VariantType.String)
+        }
+
+        for key, value in initial_values.items():
+            if key in self.variables and self.variables[key] is not None:
+                self.variables[key].set_value(value)
+            else:
+                print(f"Warning: Variable '{key}' is not initialized or is None.")
+
+        print("All variables have been reset to their initial values.")
+
     def update_variable(self, var_name: str, value):
         self.write_variable(var_name, value)
 
@@ -165,6 +212,36 @@ class OPCServer:
 
     def finish_process(self):
         return self.variables["Finish_Process"].get_value()
+
+    def stop_process(self):
+        return self.variables["Stop_Process"].get_value()
+
+    def reset_process(self):
+        return self.variables["Reset_Process"].get_value()
+
+    def under_attack(self):
+        return self.variables["Under_Attack"].get_value()
+
+    def get_attack_type(self):
+        return self.variables["Attack_Type"].get_value()
+
+    def deny_attack(self):
+        return self.variables["Attack_Type"].get_value() == 0
+
+    def host_and_watch_attack(self):
+        return self.variables["Attack_Type"].get_value() == 1
+
+    def insert_attack(self):
+        return self.variables["Attack_Type"].get_value() == 2
+
+    def intercept_attack(self):
+        return self.variables["Attack_Type"].get_value() == 3
+
+    def stealth_insert_attack(self):
+        return self.variables["Attack_Type"].get_value() == 4
+
+    def get_attack_event(self):
+        return self.variables["Attack_Event"].get_value()
 
     def level_high(self):
         return self.variables["Level_High"].get_value()
@@ -216,6 +293,16 @@ class OPCServer:
 
     def update_finish_process(self, value: bool):
         self.write_variable("Finish_Process", value)
+
+    def update_stop_process(self, value: bool):
+        self.write_variable("Stop_Process", value)
+
+    def update_reset_process(self, value: bool):
+        self.write_variable("Reset_Process", value)
+
+    def update_under_attack(self, value: bool):
+        self.write_variable("Release_Attack", not value)
+        self.write_variable("Under_Attack", value)
 
     def update_level_high(self, value: bool):
         self.write_variable("Level_High", value)

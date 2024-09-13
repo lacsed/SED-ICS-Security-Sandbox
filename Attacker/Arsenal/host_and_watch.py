@@ -1,5 +1,3 @@
-import time
-
 from OPCServer.opc_server import OPCServer
 
 
@@ -8,7 +6,5 @@ def host_and_watch(server: OPCServer):
     print(f"Monitoring System...")
 
     for event in server.variables:
-        if str(event) == 'True':
+        if server.query_variable(event):
             print(f"Event '{event}' has already been processed. Monitoring post-execution.")
-
-    time.sleep(0.01)
