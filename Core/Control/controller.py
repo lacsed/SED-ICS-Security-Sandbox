@@ -32,142 +32,121 @@ class Controller(threading.Thread):
         super().__init__()
         self.semaphore = semaphore
         self.server = server
-        self.location = "Controller_Location"
+        self.controlable_events = ['Open_Input_Valve', 'Close_Input_Valve',
+                                   'Open_Output_Valve', 'Close_Output_Valve',
+                                   'Control_Temperature_On', 'Control_Temperature_Off',
+                                   'Mixer_On', 'Mixer_Off', 'Pump_On', 'Pump_Off', 'Reset']
+        self.uncontrolable_events = ['Level_High', 'Level_Low', 'Heated', 'Cooled',
+                                     'Start_Process', 'Finish_Process']
+        self.control = DES(self.controlable_events, len(self.controlable_events),
+                           self.uncontrolable_events, len(self.uncontrolable_events))
+        self.attacker = Attacker(self.server)
+
+    def initialize_supervisors(self):
+        supervisors = [
+            OpenInputValveSupervisor(), CloseInputValveSupervisor(),
+            OpenOutputValveSupervisor(), CloseOutputValveSupervisor(),
+            StartingMixerSupervisor(), StoppingMixerSupervisor(),
+            StartingPumpSupervisor(), StoppingPumpSupervisor(),
+            StartingTemperatureControlSupervisor(), StoppingTemperatureControlSupervisor()
+        ]
+        for supervisor in supervisors:
+            self.control.add_supervisor(supervisor.initialize_supervisor())
+
+    def initialize_automatons(self):
+        automatons = [
+            ProcessAutomaton(), InputValveAutomaton(),
+            OutputValveAutomaton(), MixerAutomaton(),
+            PumpAutomaton(), TemperatureControlAutomaton()
+        ]
+        for automaton in automatons:
+            self.control.add_plant(automaton.initialize_automaton())
+
+    def process_deny_event_attack(self):
+        if self.server.under_attack():
+            if self.server.deny_attack():
+                self.attacker.attacker_handler()
+
+
+    def process_attacks(self):
+        if self.server.under_attack():
+            if self.server.intercept_attack():
+                self.attacker.attacker_handler()
+            elif self.server.host_and_watch_attack():
+                self.attacker.attacker_handler()
+
+    def process_insert_event_attack(self):
+        if self.server.under_attack():
+            if self.server.insert_attack():
+                self.attacker.attacker_handler()
+                self.server.update_under_attack(False)
+
+    def process_event(self, event):
+        # Process Attacks
+        self.process_attacks()
+        processed_events = set(self.server.query_processed_events())
+        if event in processed_events:
+            return
+
+        possible_plants = [plant for plant in self.control.plants if plant.is_defined(event)]
+        time.sleep(0.01)
+        event_processed = False
+
+        for plant in possible_plants:
+            if plant.is_feasible(event) and not any(sup.is_disabled(event) for sup in self.control.supervisors):
+                plant.trigger(event)
+                self.control.trigger_supervisors(event)
+                self.control.update_des()
+                self.server.update_variable(event, True)
+                # Process Attacks
+                self.process_deny_event_attack()
+                time.sleep(0.01)
+                print(Fore.LIGHTWHITE_EX + f"Event '{event}' executed successfully." + Style.RESET_ALL)
+                self.server.add_to_processed_events(event)
+                event_processed = True
+                break
+            else:
+                print(Fore.LIGHTWHITE_EX + f"Event '{event}' is not feasible in the current state of the plant '{plant.name}'." + Style.RESET_ALL)
+
+        if not event_processed:
+            self.server.add_to_unprocessed_events(event)
+
+        self.semaphore.acquire()
+        self.process_uncontrolable_events()
+        time.sleep(0.01)
+        self.semaphore.release()
+
+    def process_uncontrolable_events(self):
+        for uncontrolable_event in self.uncontrolable_events:
+            if self.server.query_variable(uncontrolable_event):
+                for sup in self.control.supervisors:
+                    if sup.is_feasible(uncontrolable_event):
+                        sup.trigger(uncontrolable_event)
 
     def run(self):
-        controlable_events = ['Open_Input_Valve', 'Close_Input_Valve',
-                              'Open_Output_Valve', 'Close_Output_Valve',
-                              'Control_Temperature_On', 'Control_Temperature_Off',
-                              'Mixer_On', 'Mixer_Off', 'Pump_On', 'Pump_Off', 'Reset']
+        self.initialize_supervisors()
+        self.initialize_automatons()
 
-        uncontrolable_events = ['Level_High', 'Level_Low', 'Heated', 'Cooled',
-                                'Start_Process', 'Finish_Process']
-
-        control = DES(controlable_events, controlable_events.__len__(),
-                      uncontrolable_events, uncontrolable_events.__len__())
-
-        # Supervisors
-        open_input_valve_supervisor = OpenInputValveSupervisor().initialize_supervisor()
-        control.add_supervisor(open_input_valve_supervisor)
-
-        close_input_valve_supervisor = CloseInputValveSupervisor().initialize_supervisor()
-        control.add_supervisor(close_input_valve_supervisor)
-
-        open_output_valve_supervisor = OpenOutputValveSupervisor().initialize_supervisor()
-        control.add_supervisor(open_output_valve_supervisor)
-
-        close_output_valve_supervisor = CloseOutputValveSupervisor().initialize_supervisor()
-        control.add_supervisor(close_output_valve_supervisor)
-
-        starting_mixer_supervisor = StartingMixerSupervisor().initialize_supervisor()
-        control.add_supervisor(starting_mixer_supervisor)
-
-        stopping_mixer_supervisor = StoppingMixerSupervisor().initialize_supervisor()
-        control.add_supervisor(stopping_mixer_supervisor)
-
-        starting_pump_supervisor = StartingPumpSupervisor().initialize_supervisor()
-        control.add_supervisor(starting_pump_supervisor)
-
-        stopping_pump_supervisor = StoppingPumpSupervisor().initialize_supervisor()
-        control.add_supervisor(stopping_pump_supervisor)
-
-        starting_control_temperature_supervisor = StartingTemperatureControlSupervisor().initialize_supervisor()
-        control.add_supervisor(starting_control_temperature_supervisor)
-
-        stopping_control_temperature_supervisor = StoppingTemperatureControlSupervisor().initialize_supervisor()
-        control.add_supervisor(stopping_control_temperature_supervisor)
-
-        # Automatons
-        process_automaton = ProcessAutomaton().initialize_automaton()
-        control.add_plant(process_automaton)
-
-        input_valve_automaton = InputValveAutomaton().initialize_automaton()
-        control.add_plant(input_valve_automaton)
-
-        output_valve_automaton = OutputValveAutomaton().initialize_automaton()
-        control.add_plant(output_valve_automaton)
-
-        mixer_automaton = MixerAutomaton().initialize_automaton()
-        control.add_plant(mixer_automaton)
-
-        pump_automaton = PumpAutomaton().initialize_automaton()
-        control.add_plant(pump_automaton)
-
-        temperature_control_automaton = TemperatureControlAutomaton().initialize_automaton()
-        control.add_plant(temperature_control_automaton)
-
-        # Attacker
-        attacker = Attacker(self.server)
-
-        control.update_des()
-        control.supervisor_states()
+        self.control.update_des()
+        self.control.supervisor_states()
 
         while not self.server.start_process():
             time.sleep(1)
 
-        def process_uncontrolable_events():
-            for uncontrolable_event in uncontrolable_events:
-                if self.server.query_variable(uncontrolable_event):
-                    for sup in control.supervisors:
-                        if sup.is_feasible(uncontrolable_event):
-                            sup.trigger(uncontrolable_event)
-
-        def process_event(current_event):
-            # Process attack
-            if self.server.under_attack() and self.server.intercept_attack():
-                attacker.attacker_handler()
-                self.server.update_under_attack(False)
-            if self.server.under_attack() and self.server.host_and_watch_attack():
-                attacker.attacker_handler()
-            processed_events = set(self.server.query_processed_events())
-
-            if current_event in processed_events:
-                return
-
-            possible_plants = [plant for plant in control.plants if plant.is_defined(event)]
-            time.sleep(0.01)
-
-            event_processed = False
-            for plant in possible_plants:
-                if plant.is_feasible(current_event):
-                    if any(sup.is_disabled(current_event) for sup in control.supervisors):
-                        print(f"Event {event} is disabled by a supervisor and cannot be triggered.")
-                    else:
-                        plant.trigger(current_event)
-                        control.trigger_supervisors(current_event)
-                        control.update_des()
-                        self.server.update_variable(current_event, True)
-                        # Process attack
-                        if self.server.under_attack() and self.server.deny_attack():
-                            attacker.attacker_handler()
-                        time.sleep(0.01)
-                        print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' executed successfully." + Style.RESET_ALL)
-                        self.server.add_to_processed_events(current_event)
-                        event_processed = True
-                        break
-                else:
-                    print(Fore.LIGHTWHITE_EX + f"Event '{current_event}' is not feasible in the current state of the plant '{plant.name}'." + Style.RESET_ALL)
-
-            if not event_processed:
-                self.server.add_to_unprocessed_events(current_event)
-
-            self.semaphore.acquire()
-            process_uncontrolable_events()
-            time.sleep(0.01)
-            self.semaphore.release()
-
         while not self.server.finish_process():
             unprocessed_events = deque(self.server.query_unprocessed_events())
 
+            if self.server.stop_process():
+                while not self.server.start_process():
+                    time.sleep(1)
+
             while unprocessed_events:
                 # Process attack
-                if self.server.under_attack() and self.server.insert_attack():
-                    attacker.attacker_handler()
-                    self.server.update_under_attack(False)
+                self.process_insert_event_attack()
                 event = unprocessed_events.popleft()
-                process_event(event)
+                self.process_event(event)
 
-            for event in controlable_events:
-                process_event(event)
+            for event in self.controlable_events:
+                self.process_event(event)
 
         print("Process Finished.")

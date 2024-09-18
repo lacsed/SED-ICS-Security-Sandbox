@@ -23,7 +23,11 @@ class Tank:
         def __init__(self, control):
             super().__init__()
             self.control = control
-            self.location = "Level_Location"
+
+        def stop_tank_process(self):
+            if self.control.client.read_stop_process():
+                while not self.control.client.read_start_process():
+                    time.sleep(1)
 
         def run(self):
             control = self.control
@@ -35,7 +39,11 @@ class Tank:
             time.sleep(1)
             print("Filling Tank.")
 
+            self.stop_tank_process()
+
             while control.client.read_open_input_valve():
+                self.stop_tank_process()
+
                 current_volume += 10
                 level = (current_volume / TANK_CAPACITY) * 100
                 control.client.update_variable("Level", level)
@@ -51,7 +59,11 @@ class Tank:
         def __init__(self, control):
             super().__init__()
             self.control = control
-            self.location = "Level_Location"
+
+        def stop_tank_process(self):
+            if self.control.client.read_stop_process():
+                while not self.control.client.read_start_process():
+                    time.sleep(1)
 
         def run(self):
             control = self.control
@@ -63,7 +75,11 @@ class Tank:
             print("Emptying Tank.")
             current_volume = control.client.query_variable('Volume')
 
+            self.stop_tank_process()
+
             while control.client.read_open_output_valve():
+                self.stop_tank_process()
+
                 current_volume -= 10
                 level = (current_volume / TANK_CAPACITY) * 100
                 control.client.update_variable("Level", level)
@@ -79,7 +95,11 @@ class Tank:
         def __init__(self, control):
             super().__init__()
             self.control = control
-            self.location = "Temperature_Location"
+
+        def stop_tank_process(self):
+            if self.control.client.read_stop_process():
+                while not self.control.client.read_start_process():
+                    time.sleep(1)
 
         def get_tau_value(self):
             R = 5
@@ -102,12 +122,18 @@ class Tank:
             print(Fore.RED + "Heating Tank." + Style.RESET_ALL)
             time.sleep(1)
 
+            self.stop_tank_process()
+
             while control.client.read_control_temperature_on():
+                self.stop_tank_process()
+
                 start_time = time.time()
                 time_elapsed = 0
                 current_temperature = control.client.query_variable('Temperature')
 
                 while time_elapsed < heating_time:
+                    self.stop_tank_process()
+
                     if control.client.read_control_temperature_off():
                         break
                     if current_temperature < heating_temperature:
@@ -124,7 +150,11 @@ class Tank:
         def __init__(self, control):
             super().__init__()
             self.control = control
-            self.location = "Temperature_Location"
+
+        def stop_tank_process(self):
+            if self.control.client.read_stop_process():
+                while not self.control.client.read_start_process():
+                    time.sleep(1)
 
         def get_tau_value(self):
             if self.control.read_pump_on():
@@ -148,7 +178,11 @@ class Tank:
             print(Fore.RED + "Cooling Tank." + Style.RESET_ALL)
             time.sleep(1)
 
+            self.stop_tank_process()
+
             while control.client.read_control_temperature_on():
+                self.stop_tank_process()
+
                 start_time = time.time()
                 time_elapsed = 0
                 current_temperature = control.client.query_variable('Temperature')
@@ -156,6 +190,8 @@ class Tank:
                 tau = 2 * 0.02
 
                 while time_elapsed < cooling_time:
+                    self.stop_tank_process()
+
                     if control.client.read_control_temperature_off():
                         break
                     if current_temperature > cooling_temperature:

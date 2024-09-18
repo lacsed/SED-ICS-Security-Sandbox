@@ -11,19 +11,49 @@ class Process(threading.Thread):
         self.semaphore = semaphore
         self.client = client
         self.process_automaton = ProcessAutomaton().initialize_automaton()
+        self.running = True
+        self.stopped = False
+
+    def stop_device_process(self):
+        if self.client.read_stop_process():
+            while not self.client.read_start_process():
+                time.sleep(1)
 
     def run(self):
         while not self.client.read_start_process():
+            self.stop_device_process()
             self.process_automaton.trigger('Reset')
             time.sleep(1)
 
-        if self.client.read_start_process():
-            time.sleep(1)
-            self.semaphore.acquire()
-            self.process_automaton.trigger('Start_Process')
-            print("Process started.")
-            self.semaphore.release()
+        while self.running:
+            self.stop_device_process()
 
-        if self.client.read_finish_process():
-            self.process_automaton.trigger('Finish_Process')
-            self.process_automaton.trigger('Reset')
+            if self.client.read_start_process() and not self.stopped:
+                time.sleep(1)
+                self.semaphore.acquire()
+                self.process_automaton.trigger('Start_Process')
+                print("Process started.")
+                self.client.update_start_process(False)
+                self.semaphore.release()
+
+            if self.client.read_finish_process():
+                self.semaphore.acquire()
+                self.process_automaton.trigger('Finish_Process')
+                self.process_automaton.trigger('Reset')
+                self.semaphore.release()
+                print("Process finished and reset.")
+                break
+
+            if self.client.read_stop_process():
+                if not self.stopped:
+                    self.semaphore.acquire()
+                    print("Process stopped.")
+                    self.stopped = True
+                    self.semaphore.release()
+                continue
+
+            if self.client.read_reset():
+                self.semaphore.acquire()
+                print("Process reset.")
+                self.stopped = False
+                self.semaphore.release()

@@ -9,4 +9,5 @@ def insert_event(server: OPCServer):
         return
 
     server.update_variable(event, True)
+    server.update_under_attack(False)
     print(f"Event '{event}' was insert in network.")

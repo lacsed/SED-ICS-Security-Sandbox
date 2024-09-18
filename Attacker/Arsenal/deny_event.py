@@ -11,5 +11,4 @@ def deny_event(server: OPCServer):
     if server.query_variable(event):
         server.update_variable(event, False)
         server.update_under_attack(False)
-        # "Blocks" the event by not executing it
         print(f"Event '{event}' has been denied and will not be executed.")

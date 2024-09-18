@@ -11,17 +11,23 @@ class Mixer(threading.Thread):
         super().__init__()
         self.client = client
         self.mixer_automaton = MixerAutomaton().initialize_automaton()
-        self.location = "Mixer_Location"
+
+    def stop_device_process(self):
+        if self.client.read_stop_process():
+            while not self.client.read_start_process():
+                time.sleep(1)
 
     def run(self):
         printer_count = 0
 
         while not self.client.read_mixer_on():
+            self.stop_device_process()
             self.mixer_automaton.trigger('Reset')
             time.sleep(1)
 
         self.mixer_automaton.trigger('Mixer_On')
         while self.client.read_mixer_on():
+            self.stop_device_process()
             if self.client.read_heated():
                 break
 
@@ -30,5 +36,6 @@ class Mixer(threading.Thread):
                 print(Fore.CYAN + f"Mixing tank." + Style.RESET_ALL)
                 printer_count = 0
 
+        self.stop_device_process()
         self.client.update_mixer_on(False)
         self.mixer_automaton.trigger('Mixer_Off')

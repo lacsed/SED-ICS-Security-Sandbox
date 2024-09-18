@@ -10,4 +10,5 @@ def intercept_event(server: OPCServer):
         return
 
     server.add_to_processed_events(event)
+    server.update_under_attack(False)
     print(f"Event '{event}' was intercepted and executed.")

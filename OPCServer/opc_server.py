@@ -48,7 +48,7 @@ class OPCServer:
                 "Initial_Temperature": self.obj.add_variable(self.idx, "Initial_Temperature", INITIAL_TEMP),
                 "Heating_Temperature": self.obj.add_variable(self.idx, "Heating_Temperature", HEATING_TEMP),
                 "Cooling_Temperature": self.obj.add_variable(self.idx, "Cooling_Temperature", COOLING_TEMP),
-                "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", False),
+                "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", 0),
                 "Attack_Type": self.obj.add_variable(self.idx, "Attack_Type", 0),
                 "Attack_Event": self.obj.add_variable(self.idx, "Attack_Event", 0),
                 "Processed_Events": self.obj.add_variable(self.idx, "Processed_Events",
@@ -172,7 +172,11 @@ class OPCServer:
             "Attack_Type": None,
             "Attack_Event": None,
             "Processed_Events": ua.Variant([], ua.VariantType.String),
-            "Unprocessed_Events": ua.Variant([], ua.VariantType.String)
+            "Unprocessed_Events": ua.Variant([], ua.VariantType.String),
+            "Stop_Process": False,
+            "Reset_Process": False,
+            "Under_Attack": False,
+            "Release_Attack": True
         }
 
         for key, value in initial_values.items():

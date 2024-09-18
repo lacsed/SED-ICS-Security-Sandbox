@@ -10,20 +10,28 @@ class TemperatureControl(threading.Thread):
         super().__init__()
         self.client = client
         self.temperature_control_automaton = TemperatureControlAutomaton().initialize_automaton()
-        self.location = "Temperature_Location"
+
+    def stop_device_process(self):
+        if self.client.read_stop_process():
+            while not self.client.read_start_process():
+                time.sleep(1)
 
     def run(self):
         heating_temperature = self.client.query_variable('Heating_Temperature')
         cooling_temperature = self.client.query_variable('Cooling_Temperature')
 
         while not self.client.read_control_temperature_on():
+            self.stop_device_process()
             self.temperature_control_automaton.trigger('Reset')
             time.sleep(1)
+
+        self.stop_device_process()
 
         if self.client.read_control_temperature_on():
             self.temperature_control_automaton.trigger('Control_Temperature_On')
 
         while not self.client.read_control_temperature_off():
+            self.stop_device_process()
             if self.client.query_variable('Temperature') >= heating_temperature:
                 self.client.update_cooled(False)
                 self.client.update_heated(True)

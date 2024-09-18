@@ -11,17 +11,25 @@ class Pump(threading.Thread):
         super().__init__()
         self.client = client
         self.pump_automaton = PumpAutomaton().initialize_automaton()
-        self.location = "Pump_Location"
+
+    def stop_device_process(self):
+        if self.client.read_stop_process():
+            while not self.client.read_start_process():
+                time.sleep(1)
 
     def run(self):
         printer_count = 0
 
         while not self.client.read_pump_on():
+            self.stop_device_process()
             self.pump_automaton.trigger('Reset')
             time.sleep(1)
 
+        self.stop_device_process()
+
         self.pump_automaton.trigger('Pump_On')
         while self.client.read_pump_on():
+            self.stop_device_process()
             if self.client.read_cooled():
                 break
 
