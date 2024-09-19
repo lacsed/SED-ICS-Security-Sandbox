@@ -32,7 +32,6 @@ class Process(threading.Thread):
                 time.sleep(1)
                 self.semaphore.acquire()
                 self.process_automaton.trigger('Start_Process')
-                print("Process started.")
                 self.client.update_start_process(False)
                 self.semaphore.release()
 
@@ -41,19 +40,16 @@ class Process(threading.Thread):
                 self.process_automaton.trigger('Finish_Process')
                 self.process_automaton.trigger('Reset')
                 self.semaphore.release()
-                print("Process finished and reset.")
                 break
 
             if self.client.read_stop_process():
                 if not self.stopped:
                     self.semaphore.acquire()
-                    print("Process stopped.")
                     self.stopped = True
                     self.semaphore.release()
                 continue
 
             if self.client.read_reset():
                 self.semaphore.acquire()
-                print("Process reset.")
                 self.stopped = False
                 self.semaphore.release()

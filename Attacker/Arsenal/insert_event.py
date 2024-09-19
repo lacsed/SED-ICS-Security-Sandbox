@@ -1,5 +1,8 @@
+import time
+
 from OPCServer.opc_server import OPCServer
 from Tools.mapper import get_event_name
+from colorama import Fore, Style
 
 
 def insert_event(server: OPCServer):
@@ -9,5 +12,6 @@ def insert_event(server: OPCServer):
         return
 
     server.update_variable(event, True)
+    time.sleep(1)
     server.update_under_attack(False)
-    print(f"Event '{event}' was insert in network.")
+    print(Fore.YELLOW + f"Event '{event}' was insert in network." + Style.RESET_ALL)

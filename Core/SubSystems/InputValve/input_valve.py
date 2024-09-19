@@ -34,4 +34,3 @@ class InputValve(threading.Thread):
         if self.client.read_close_input_valve():
             self.input_valve_automaton.trigger('Close_Input_Valve')
             self.input_valve_automaton.trigger('Reset')
-

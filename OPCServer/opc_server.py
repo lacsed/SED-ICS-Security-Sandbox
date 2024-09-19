@@ -93,7 +93,6 @@ class OPCServer:
                 if isinstance(current_value, list):
                     current_value.append(value)
                     variable.set_value(current_value)
-                    print(f"Value '{value}' added to '{var_name}' successfully.")
                 else:
                     print(f"Variable '{var_name}' is not a list.")
             else:
@@ -110,7 +109,6 @@ class OPCServer:
                     if value in current_value:
                         current_value.remove(value)
                         variable.set_value(current_value)
-                        print(f"Value '{value}' removed from '{var_name}' successfully.")
                     else:
                         print(f"Value '{value}' not found in '{var_name}'.")
                 else:

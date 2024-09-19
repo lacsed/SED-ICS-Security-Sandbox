@@ -10,3 +10,4 @@ def stealth_insert(server: OPCServer):
 
     server.update_variable(event, True)
     print(f"Event '{event}' was insert in network.")
+    # atacante insere um evento e só o controlador vê (sensor)

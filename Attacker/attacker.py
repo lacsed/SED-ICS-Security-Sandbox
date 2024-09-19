@@ -1,5 +1,3 @@
-import time
-
 from Attacker.Arsenal.deny_event import deny_event
 from Attacker.Arsenal.host_and_watch import host_and_watch
 from Attacker.Arsenal.insert_event import insert_event
@@ -28,5 +26,3 @@ class Attacker:
             attack_handlers[attack_type](self.server)
         else:
             raise ValueError("Invalid attack type specified.")
-
-        # atacante insere um evento e só o controlador vê (sensor)

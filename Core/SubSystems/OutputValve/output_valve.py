@@ -9,7 +9,7 @@ class OutputValve(threading.Thread):
     def __init__(self, client: OPCClient):
         super().__init__()
         self.client = client
-        self.output_valve_automaton = OutputValveAutomaton().initialize_automaton_with_client(self.client)
+        self.output_valve_automaton = OutputValveAutomaton().initialize_automaton()
 
     def stop_device_process(self):
         if self.client.read_stop_process():
@@ -35,4 +35,3 @@ class OutputValve(threading.Thread):
         if self.client.read_close_output_valve():
             self.output_valve_automaton.trigger('Close_Input_Valve')
             self.output_valve_automaton.trigger('Reset')
-

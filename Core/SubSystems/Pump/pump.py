@@ -18,8 +18,6 @@ class Pump(threading.Thread):
                 time.sleep(1)
 
     def run(self):
-        printer_count = 0
-
         while not self.client.read_pump_on():
             self.stop_device_process()
             self.pump_automaton.trigger('Reset')
@@ -28,15 +26,11 @@ class Pump(threading.Thread):
         self.stop_device_process()
 
         self.pump_automaton.trigger('Pump_On')
+        print(Fore.MAGENTA + f"Pumping tank." + Style.RESET_ALL)
         while self.client.read_pump_on():
             self.stop_device_process()
             if self.client.read_cooled():
                 break
-
-            printer_count += 1
-            if printer_count == 100:
-                print(Fore.MAGENTA + f"Pumping tank." + Style.RESET_ALL)
-                printer_count = 0
 
         self.client.update_pump_on(False)
         self.pump_automaton.trigger('Pump_Off')

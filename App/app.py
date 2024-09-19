@@ -1,5 +1,6 @@
 import threading
 import time
+from colorama import Fore, Style
 
 from Core.Control.controller import Controller
 from Core.Process.Tank.tank import Tank
@@ -62,13 +63,17 @@ class SystemSetup:
         self.level_transmitter.start()
         self.controller.start()
 
-        print("System initialized.")
+        print(Fore.LIGHTGREEN_EX + "System initialized." + Style.RESET_ALL)
         self.system_initialized = True
+        self.server.update_stop_process(False)
+        self.server.update_reset_process(False)
         self.server.update_finish_process(False)
 
     def stop_threads(self):
         # Stop all subsystem threads
-        print("Stopping system...")
+        if self.server.stop_process():
+            print(Fore.LIGHTRED_EX + "Stopping system..." + Style.RESET_ALL)
+
         self.system_initialized = False
 
         self.process.join()
@@ -81,11 +86,12 @@ class SystemSetup:
         self.level_transmitter.join()
         self.controller.join()
 
-        print("System stopped.")
+        if self.server.stop_process():
+            print(Fore.LIGHTRED_EX + "System stopped." + Style.RESET_ALL)
 
     def reset_system(self):
         # Reset all subsystems and restart them
-        print("Resetting system...")
+        print(Fore.LIGHTYELLOW_EX + "Resetting system..." + Style.RESET_ALL)
         self.server.reset_variables()
 
         # Stop current threads
@@ -95,7 +101,8 @@ class SystemSetup:
         time.sleep(1)
 
         self.server.update_reset_process(False)
-        print("System reset.")
+        print(Fore.LIGHTYELLOW_EX + "System reset." + Style.RESET_ALL)
+
 
 if __name__ == "__main__":
     system_setup = SystemSetup()

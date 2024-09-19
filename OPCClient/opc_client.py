@@ -76,7 +76,7 @@ class OPCClient:
                 elif isinstance(value, str):
                     variant_type = ua.VariantType.String
                 elif isinstance(value, list):
-                    variant_type = ua.VariantType.String  # Para listas de strings
+                    variant_type = ua.VariantType.String
                 else:
                     raise ValueError(f"Unsupported variable type: {type(value)}")
 
@@ -91,9 +91,6 @@ class OPCClient:
         if var_type in self.variables:
             try:
                 value = self.variables[var_type].get_value()
-                text = "Enabled" if value is True else "Disabled"
-
-                # print(Fore.YELLOW + f"Event '{var_type}' is currently {text}" + Style.RESET_ALL)
                 return value
             except Exception as e:
                 print(Fore.LIGHTRED_EX + f"Error reading variable '{var_type}':", e, Style.RESET_ALL)
@@ -106,7 +103,6 @@ class OPCClient:
             if isinstance(current_value, list):
                 current_value.append(value)
                 self.write_variable(var_name, current_value)
-                print(Fore.YELLOW + f"Value '{value}' added to '{var_name}' successfully." + Style.RESET_ALL)
             else:
                 print(Fore.LIGHTRED_EX + f"Variable '{var_name}' is not a list." + Style.RESET_ALL)
         except Exception as e:
@@ -119,7 +115,6 @@ class OPCClient:
                 if value in current_value:
                     current_value.remove(value)
                     self.write_variable(var_name, current_value)
-                    print(Fore.YELLOW + f"Value '{value}' removed from '{var_name}' successfully." + Style.RESET_ALL)
                 else:
                     print(Fore.LIGHTRED_EX + f"Value '{value}' not found in '{var_name}'." + Style.RESET_ALL)
             else:

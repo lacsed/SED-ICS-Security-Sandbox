@@ -149,4 +149,4 @@ class Controller(threading.Thread):
             for event in self.controlable_events:
                 self.process_event(event)
 
-        print("Process Finished.")
+        print("Finished batch.")
