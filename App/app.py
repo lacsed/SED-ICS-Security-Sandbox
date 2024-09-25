@@ -123,11 +123,15 @@ if __name__ == "__main__":
     # Main control loop
     while True:
         if system_setup.server.start_process() and not system_setup.system_initialized:
+            system_setup.semaphore.acquire()
             system_setup.create_threads()
+            system_setup.semaphore.release()
         if system_setup.server.stop_process():
             system_setup.stop_threads()
             while not system_setup.server.start_process():
                 time.sleep(1)
             continue
         if system_setup.server.reset_process():
+            system_setup.semaphore.acquire()
             system_setup.reset_system()
+            system_setup.semaphore.release()

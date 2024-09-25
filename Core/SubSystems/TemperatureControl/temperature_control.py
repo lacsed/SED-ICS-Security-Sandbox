@@ -32,7 +32,7 @@ class TemperatureControl(threading.Thread):
 
         while not self.client.read_control_temperature_off():
             self.stop_device_process()
-            if self.client.query_variable('Temperature') >= heating_temperature:
+            if self.client.query_variable('Temperature') >= (heating_temperature - 15):
                 self.client.update_cooled(False)
                 self.client.update_heated(True)
             if self.client.read_heated():

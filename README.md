@@ -3,20 +3,25 @@
 This project represents a real industrial process consisting of the following production steps:
 
 1. **Open the Input Valve**
-   1. Wait for the event indicating the level has reached the highest value
+   - The input valve opens, allowing fluid to flow into the tank.
+   - The system monitors the fluid level, waiting until the level high event is triggered, indicating that the tank is full
 2. **Close the Input Valve**
-3. **Turn on the Temperature Control**
-   1. Wait for the event indicating the tank is heated
-   2. Wait for the event indicating the tank is cooled
-4. **Turn on the Mixer**
-5. **Turn off the Mixer**
-6. **Turn on the Pump**
-7. **Turn off the Pump**
-8. **Open the Output Valve**
-   1. Wait for the event indicating the level has reached the lowest value
-9. **Turn off the Temperature Control**
-10. **Close the Output Valve**
-11. **Finish the process**
+   - Once the level high event is detected, the input valve is closed to stop the inflow of fluid.
+3. **Heat the Fluid**
+   - The temperature control system is activated to heat the fluid in the tank.
+   - Simultaneously, the mixer is turned on to ensure even heating of the fluid.
+   - The mixer remains on until the heated event is triggered, indicating the fluid has reached the desired temperature.
+4. **Cool the Tank:**
+   - After heating, the cooling phase begins. 
+   - The pump is turned on to assist in cooling the fluid. 
+   - The system continues cooling until the cooled event is triggered, confirming that the fluid has reached the required low temperature.
+5. **Open the Output Valve**
+   -  The output valve opens to release the fluid from the tank. 
+   - The system waits until the level low event is triggered, indicating the tank has emptied to the desired level.
+6. **Close the Output Valve**
+   - Once the tank is emptied, the output valve is closed to complete the outflow process. 
+7. **Finish the Process**
+   - After the output valve is closed, the system concludes the current process cycle. 
 
 ## Project Structure
 
@@ -29,38 +34,54 @@ IndustrialPlantSimulation/
 ├── App/
 │   └── app.py                   # Main application entry point
 │
+├── Attacker/
+│   ├── Arsenal/
+│   │   ├── deny_event.py         # Logic for denying events
+│   │   ├── host_and_watch.py     # Host and watch attacker logic
+│   │   ├── insert_event.py       # Logic for inserting events
+│   │   ├── intercept_event.py    # Logic for intercepting events
+│   │   └── stealth_insert.py     # Logic for stealth event insertion
+│   └── attacker.py               # Main attacker module
+│
 ├── Configuration/
-│   └── set_points.py            # Configuration settings for the application
+│   └── set_points.py             # Configuration settings for the application
 │
 ├── Core/
 │   ├── Control/
 │   │   └── DES/
-│   │       └── controller.py    # Control system for the application
+│   │       └── controller.py     # Control system for the application
 │   │
 │   ├── Process/
-│   │   └── SubSystems/
-│   │       └── InputValve/ # Each of all of one the subsystems have a similar structure shown below in the Input Valve subsystem
-│   │           ├── Automaton/
-│   │           │   └── input_valve_automaton.py     # Automaton for input valve control
-│   │           │
-│   │           ├── Supervisors/
-│   │           │   ├── close_input_valve_supervisor.py  # Supervisor to close input valve
-│   │           │   └── open_input_valve_supervisor.py   # Supervisor to open input valve
-│   │           │
-│   │           └── input_valve.py                     # Input valve system
+│   │   ├── Automaton/
+│   │   │   └── process_automaton.py   # Automaton for process control
+│   │   ├── Tank/
+│   │   │   └── tank.py               # Tank system control
+│   │   └── process.py                # Process logic
 │   │
-│   │       ├── LevelTransmitter/       # Level transmitter subsystem
-│   │       ├── Mixer/                  # Mixer subsystem
-│   │       ├── OutputValve/            # Output valve subsystem
-│   │       ├── Pump/                   # Pump subsystem
-│   │       └── TemperatureControl/     # Temperature control subsystem
+│   └── SubSystems/
+│       ├── InputValve/
+│       │   ├── Automaton/
+│       │   │   └── input_valve_automaton.py     # Automaton for input valve control
+│       │   ├── Supervisors/
+│       │   │   ├── close_input_valve_supervisor.py  # Supervisor to close input valve
+│       │   │   └── open_input_valve_supervisor.py   # Supervisor to open input valve
+│       │   └── input_valve.py                     # Input valve system
+│       │
+│       ├── LevelTransmitter/        # Level transmitter subsystem
+│       ├── Mixer/                   # Mixer subsystem
+│       ├── OutputValve/             # Output valve subsystem
+│       ├── Pump/                    # Pump subsystem
+│       └── TemperatureControl/      # Temperature control subsystem
 │
-├── OPCClient/                 # OPC client for communication
-├── OPCServer/                 # OPC server for communication
-├── SCADA/                     # SCADA system integration
+├── OPCClient/                     # OPC client for communication
+├── OPCServer/                     # OPC server for communication
+├── SCADA/                         # SCADA system integration
 │
-├── requirements.txt           # List of required Python packages
-└── README.md                  # Project documentation
+├── Tools/
+│   └── mapper.py                  # Tool for mapping data
+│
+├── requirements.txt               # List of required Python packages
+└── README.md                      # Project documentation
 ```
 
 ## Installation

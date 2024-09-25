@@ -49,6 +49,7 @@ class Tank:
                 control.client.update_variable("Level", level)
                 control.client.update_variable("Volume", current_volume)
                 print(Fore.BLUE + f"Level in {level:.2f}% of capacity" + Style.RESET_ALL)
+                time.sleep(0.5)
 
                 if level == 100:
                     break
@@ -85,6 +86,7 @@ class Tank:
                 control.client.update_variable("Level", level)
                 control.client.update_variable("Volume", current_volume)
                 print(Fore.BLUE + f"Level in {level:.2f}% of capacity" + Style.RESET_ALL)
+                time.sleep(0.5)
 
                 if level == 0:
                     break
@@ -131,7 +133,7 @@ class Tank:
                 time_elapsed = 0
                 current_temperature = control.client.query_variable('Temperature')
 
-                while time_elapsed < heating_time:
+                while (time_elapsed/100000) < heating_time:
                     self.stop_tank_process()
 
                     if control.client.read_control_temperature_off():
@@ -140,8 +142,6 @@ class Tank:
                         time_elapsed = time.time() - start_time
                         current_temperature += (heating_temperature - initial_temperature) * (1 - math.exp(-(time_elapsed / 60) / (control.R * control.C)))
                         control.client.update_variable("Temperature", current_temperature)
-
-                    print(Fore.RED + f"Temperature set to {current_temperature:.2f}ºC." + Style.RESET_ALL)
 
                 break
 
@@ -189,7 +189,7 @@ class Tank:
 
                 tau = 2 * 0.02
 
-                while time_elapsed < cooling_time:
+                while (time_elapsed/100000) < cooling_time:
                     self.stop_tank_process()
 
                     if control.client.read_control_temperature_off():
@@ -198,8 +198,6 @@ class Tank:
                         time_elapsed = time.time() - start_time
                         current_temperature = cooling_temperature + (current_temperature - cooling_temperature) * math.exp(-time_elapsed / (60 * tau))
                         control.client.update_variable("Temperature", current_temperature)
-
-                    print(Fore.RED + f"Temperature set to {current_temperature:.2f}ºC." + Style.RESET_ALL)
 
                 break
 
