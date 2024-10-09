@@ -36,14 +36,15 @@ class OPCClient:
             "Initial_Temperature": None,
             "Heating_Temperature": None,
             "Cooling_Temperature": None,
-            "Operation_Mode": None,
             "Attack_Type": "",
             "Attack_Event": "",
             "Processed_Events": None,
             "Unprocessed_Events": None,
             "Stop_Process": None,
             "Reset_Process": None,
-            "Under_Attack": False
+            "Under_Attack": None,
+            "Release_Attack": None,
+            "Operation_Mode": None
         }
 
     def connect(self):

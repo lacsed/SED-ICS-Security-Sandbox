@@ -32,7 +32,6 @@ class Process(threading.Thread):
                 time.sleep(1)
                 self.semaphore.acquire()
                 self.process_automaton.trigger('Start_Process')
-                self.client.update_start_process(False)
                 self.semaphore.release()
 
             if self.client.read_finish_process():

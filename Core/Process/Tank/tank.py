@@ -133,7 +133,7 @@ class Tank:
                 time_elapsed = 0
                 current_temperature = control.client.query_variable('Temperature')
 
-                while (time_elapsed/100000) < heating_time:
+                while (time_elapsed/10000000) < heating_time:
                     self.stop_tank_process()
 
                     if control.client.read_control_temperature_off():
@@ -189,7 +189,7 @@ class Tank:
 
                 tau = 2 * 0.02
 
-                while (time_elapsed/100000) < cooling_time:
+                while (time_elapsed/10000000) < cooling_time:
                     self.stop_tank_process()
 
                     if control.client.read_control_temperature_off():

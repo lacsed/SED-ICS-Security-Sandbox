@@ -48,7 +48,6 @@ class OPCServer:
                 "Initial_Temperature": self.obj.add_variable(self.idx, "Initial_Temperature", INITIAL_TEMP),
                 "Heating_Temperature": self.obj.add_variable(self.idx, "Heating_Temperature", HEATING_TEMP),
                 "Cooling_Temperature": self.obj.add_variable(self.idx, "Cooling_Temperature", COOLING_TEMP),
-                "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", 0),
                 "Attack_Type": self.obj.add_variable(self.idx, "Attack_Type", 0),
                 "Attack_Event": self.obj.add_variable(self.idx, "Attack_Event", 0),
                 "Processed_Events": self.obj.add_variable(self.idx, "Processed_Events",
@@ -58,7 +57,8 @@ class OPCServer:
                 "Stop_Process": self.obj.add_variable(self.idx, "Stop_Process", False),
                 "Reset_Process": self.obj.add_variable(self.idx, "Reset_Process", False),
                 "Under_Attack": self.obj.add_variable(self.idx, "Under_Attack", False),
-                "Release_Attack": self.obj.add_variable(self.idx, "Release_Attack", True)
+                "Release_Attack": self.obj.add_variable(self.idx, "Release_Attack", True),
+                "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", False)
             }
 
             for var in self.variables.values():
@@ -287,8 +287,8 @@ class OPCServer:
     def pump_off(self):
         return self.variables["Pump_Off"].get_value()
 
-    def reset(self):
-        return self.variables["Reset"].get_value()
+    def manual_mode(self):
+        return self.variables["Operation_Mode"].get_value()
 
     def update_start_process(self, value: bool):
         self.write_variable("Start_Process", value)

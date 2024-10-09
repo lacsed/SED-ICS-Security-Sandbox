@@ -67,12 +67,13 @@ class Controller(threading.Thread):
             if self.server.deny_attack():
                 self.attacker.attacker_handler()
 
-
     def process_attacks(self):
         if self.server.under_attack():
             if self.server.intercept_attack():
                 self.attacker.attacker_handler()
             elif self.server.host_and_watch_attack():
+                self.attacker.attacker_handler()
+            elif self.server.stealth_insert_attack():
                 self.attacker.attacker_handler()
 
     def process_insert_event_attack(self):
@@ -143,10 +144,17 @@ class Controller(threading.Thread):
             while unprocessed_events:
                 # Process attack
                 self.process_insert_event_attack()
-                event = unprocessed_events.popleft()
-                self.process_event(event)
 
-            for event in self.controlable_events:
-                self.process_event(event)
+                if self.server.manual_mode():
+                    for manual_event in self.server.query_unprocessed_events():
+                        if self.server.query_variable(manual_event):
+                            self.process_event(manual_event)
+                else:
+                    event = unprocessed_events.popleft()
+                    self.process_event(event)
+
+            if not self.server.manual_mode():
+                for event in self.controlable_events:
+                    self.process_event(event)
 
         print("Finished batch.")
