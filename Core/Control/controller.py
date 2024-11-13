@@ -25,6 +25,7 @@ from Core.SubSystems.TemperatureControl.Supervisors.starting_temperature_control
 from Core.SubSystems.TemperatureControl.Supervisors.stopping_temperature_control_supervisor import \
     StoppingTemperatureControlSupervisor
 from OPCServer.opc_server import OPCServer
+from Tools.mapper import get_event_name
 
 
 class Controller(threading.Thread):
@@ -103,6 +104,7 @@ class Controller(threading.Thread):
                 self.process_deny_event_attack()
                 time.sleep(0.01)
                 print(Fore.LIGHTWHITE_EX + f"Event '{event}' executed successfully." + Style.RESET_ALL)
+                # if not event == get_event_name(self.server.query_variable('Attack_Event')):
                 self.server.add_to_processed_events(event)
                 event_processed = True
                 break
@@ -150,7 +152,7 @@ class Controller(threading.Thread):
                         if self.server.query_variable(manual_event):
                             self.process_event(manual_event)
                 else:
-                    event = unprocessed_events.popleft()
+                    event = unprocessed_events.pop()
                     self.process_event(event)
 
             if not self.server.manual_mode():

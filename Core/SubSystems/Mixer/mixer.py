@@ -31,5 +31,6 @@ class Mixer(threading.Thread):
                 break
 
         self.stop_device_process()
+
         self.client.update_mixer_on(False)
         self.mixer_automaton.trigger('Mixer_Off')

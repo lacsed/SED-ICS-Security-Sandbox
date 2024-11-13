@@ -44,7 +44,9 @@ class OPCClient:
             "Reset_Process": None,
             "Under_Attack": None,
             "Release_Attack": None,
-            "Operation_Mode": None
+            "Operation_Mode": None,
+            "AttacksQueue": None,
+            "Attack_Detected": None
         }
 
     def connect(self):
@@ -215,6 +217,9 @@ class OPCClient:
 
     def update_reset(self, value: bool):
         self.write_variable("Reset", value)
+
+    def attack_detected(self, value: bool):
+        self.write_variable("Attack_Detected", value)
 
     def read_start_process(self):
         return self.read_variable("Start_Process")

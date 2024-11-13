@@ -58,7 +58,9 @@ class OPCServer:
                 "Reset_Process": self.obj.add_variable(self.idx, "Reset_Process", False),
                 "Under_Attack": self.obj.add_variable(self.idx, "Under_Attack", False),
                 "Release_Attack": self.obj.add_variable(self.idx, "Release_Attack", True),
-                "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", False)
+                "Operation_Mode": self.obj.add_variable(self.idx, "Operation_Mode", False),
+                "AttacksQueue": self.obj.add_variable(self.idx, "AttacksQueue", ua.Variant([], ua.VariantType.String)),
+                "Attack_Detected": self.obj.add_variable(self.idx, "Attack_Detected", False)
             }
 
             for var in self.variables.values():

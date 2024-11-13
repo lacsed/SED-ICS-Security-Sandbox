@@ -11,6 +11,7 @@ from Core.SubSystems.OutputValve.output_valve import OutputValve
 from Core.Process.process import Process
 from Core.SubSystems.Pump.pump import Pump
 from Core.SubSystems.TemperatureControl.temperature_control import TemperatureControl
+from IDS.ids import IDS
 from OPCClient.opc_client import OPCClient
 from OPCServer.opc_server import OPCServer
 
@@ -25,6 +26,7 @@ class SystemSetup:
         self.client_mixer = OPCClient()
         self.client_pump = OPCClient()
         self.client_temperature_control = OPCClient()
+        self.client_ids = OPCClient()
 
         self.semaphore = threading.Semaphore(1)
         self.system_initialized = False
@@ -38,6 +40,7 @@ class SystemSetup:
         self.mixer = Mixer(self.client_mixer)
         self.pump = Pump(self.client_pump)
         self.temperature_control = TemperatureControl(self.client_temperature_control)
+        self.ids = IDS(self.client_ids)
         self.controller = Controller(self.semaphore, self.server)
 
     def create_threads(self):
@@ -50,6 +53,7 @@ class SystemSetup:
         self.mixer = Mixer(self.client_mixer)
         self.pump = Pump(self.client_pump)
         self.temperature_control = TemperatureControl(self.client_temperature_control)
+        self.ids = IDS(self.client_ids)
         self.controller = Controller(self.semaphore, self.server)
 
         # Start threads
@@ -61,6 +65,7 @@ class SystemSetup:
         self.pump.start()
         self.temperature_control.start()
         self.level_transmitter.start()
+        self.ids.start()
         self.controller.start()
 
         print(Fore.LIGHTGREEN_EX + "System initialized." + Style.RESET_ALL)
@@ -84,6 +89,7 @@ class SystemSetup:
         self.pump.join()
         self.temperature_control.join()
         self.level_transmitter.join()
+        self.ids.join()
         self.controller.join()
 
         if self.server.stop_process():
@@ -119,6 +125,7 @@ if __name__ == "__main__":
     system_setup.client_mixer.connect()
     system_setup.client_pump.connect()
     system_setup.client_temperature_control.connect()
+    system_setup.client_ids.connect()
 
     # Main control loop
     while True:

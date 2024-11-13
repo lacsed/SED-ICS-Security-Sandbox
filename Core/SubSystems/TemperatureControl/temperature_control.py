@@ -40,6 +40,5 @@ class TemperatureControl(threading.Thread):
                     self.client.update_cooled(True)
                     self.client.update_heated(False)
 
-        if self.client.read_control_temperature_off():
-            self.client.update_control_temperature_on(False)
-            self.temperature_control_automaton.trigger('Control_Temperature_Off')
+        self.client.update_control_temperature_on(False)
+        self.temperature_control_automaton.trigger('Control_Temperature_Off')
