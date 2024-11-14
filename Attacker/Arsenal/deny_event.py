@@ -11,5 +11,6 @@ def deny_event(server: OPCServer):
 
     if server.query_variable(event):
         server.update_variable(event, False)
+        server.remove_from_processed_events(event)
         server.update_under_attack(False)
         print(Fore.YELLOW + f"Event '{event}' has been denied and will not be executed." + Style.RESET_ALL)

@@ -100,12 +100,11 @@ class Controller(threading.Thread):
                 self.control.trigger_supervisors(event)
                 self.control.update_des()
                 self.server.update_variable(event, True)
-                # Process Attacks
-                self.process_deny_event_attack()
                 time.sleep(0.01)
                 print(Fore.LIGHTWHITE_EX + f"Event '{event}' executed successfully." + Style.RESET_ALL)
-                # if not event == get_event_name(self.server.query_variable('Attack_Event')):
                 self.server.add_to_processed_events(event)
+                # Process Attacks
+                self.process_deny_event_attack()
                 event_processed = True
                 break
             else:
