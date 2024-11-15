@@ -4,6 +4,7 @@ from collections import deque
 
 from colorama import Fore, Style
 
+from Attacker.Automaton.input_valve_attack_automaton import InputValveAttackAutomaton
 from Attacker.attacker import Attacker
 from Core.Control.DES.DES import DES
 from Core.SubSystems.InputValve.Automaton.input_valve_automaton import InputValveAutomaton
@@ -25,7 +26,6 @@ from Core.SubSystems.TemperatureControl.Supervisors.starting_temperature_control
 from Core.SubSystems.TemperatureControl.Supervisors.stopping_temperature_control_supervisor import \
     StoppingTemperatureControlSupervisor
 from OPCServer.opc_server import OPCServer
-from Tools.mapper import get_event_name
 
 
 class Controller(threading.Thread):
@@ -34,9 +34,9 @@ class Controller(threading.Thread):
         self.semaphore = semaphore
         self.server = server
         self.controlable_events = ['Open_Input_Valve', 'Close_Input_Valve',
-                                   'Open_Output_Valve', 'Close_Output_Valve',
                                    'Control_Temperature_On', 'Control_Temperature_Off',
-                                   'Mixer_On', 'Mixer_Off', 'Pump_On', 'Pump_Off', 'Reset']
+                                   'Mixer_On', 'Mixer_Off', 'Pump_On', 'Pump_Off',
+                                   'Open_Output_Valve', 'Close_Output_Valve', 'Reset']
         self.uncontrolable_events = ['Level_High', 'Level_Low', 'Heated', 'Cooled',
                                      'Start_Process', 'Finish_Process']
         self.control = DES(self.controlable_events, len(self.controlable_events),
@@ -56,6 +56,7 @@ class Controller(threading.Thread):
 
     def initialize_automatons(self):
         automatons = [
+            InputValveAttackAutomaton(),
             ProcessAutomaton(), InputValveAutomaton(),
             OutputValveAutomaton(), MixerAutomaton(),
             PumpAutomaton(), TemperatureControlAutomaton()
@@ -107,8 +108,8 @@ class Controller(threading.Thread):
                 self.process_deny_event_attack()
                 event_processed = True
                 break
-            else:
-                print(Fore.LIGHTWHITE_EX + f"Event '{event}' is not feasible in the current state of the plant '{plant.name}'." + Style.RESET_ALL)
+            '''else:
+                print(Fore.LIGHTWHITE_EX + f"Event '{event}' is not feasible in the current state of the plant '{plant.name}'." + Style.RESET_ALL)'''
 
         if not event_processed:
             self.server.add_to_unprocessed_events(event)
@@ -143,6 +144,7 @@ class Controller(threading.Thread):
                     time.sleep(1)
 
             while unprocessed_events:
+                time.sleep(0.01)
                 # Process attack
                 self.process_insert_event_attack()
 
@@ -151,7 +153,7 @@ class Controller(threading.Thread):
                         if self.server.query_variable(manual_event):
                             self.process_event(manual_event)
                 else:
-                    event = unprocessed_events.pop()
+                    event = unprocessed_events.popleft()
                     self.process_event(event)
 
             if not self.server.manual_mode():

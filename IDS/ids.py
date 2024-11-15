@@ -4,6 +4,7 @@ import time
 from OPCClient.opc_client import OPCClient
 from IDS.process_sequence import process_sequence
 
+
 class IDS(threading.Thread):
     def __init__(self, client: OPCClient):
         super().__init__()

@@ -84,7 +84,7 @@ class OPCClient:
                     raise ValueError(f"Unsupported variable type: {type(value)}")
 
                 self.variables[var_name].set_value(ua.Variant(value, variant_type))
-                print(Fore.YELLOW + f"Variable '{var_name}' written successfully." + Style.RESET_ALL)
+                # print(Fore.YELLOW + f"Variable '{var_name}' written successfully." + Style.RESET_ALL)
             except Exception as e:
                 print(Fore.LIGHTRED_EX + f"Error writing variable '{var_name}': {e}" + Style.RESET_ALL)
         else:

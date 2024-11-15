@@ -2,6 +2,7 @@ import threading
 import time
 from colorama import Fore, Style
 
+from Attacker.attacker import Attacker
 from Core.Control.controller import Controller
 from Core.Process.Tank.tank import Tank
 from Core.SubSystems.InputValve.input_valve import InputValve
@@ -41,6 +42,7 @@ class SystemSetup:
         self.pump = Pump(self.client_pump)
         self.temperature_control = TemperatureControl(self.client_temperature_control)
         self.ids = IDS(self.client_ids)
+        self.attacker = Attacker(self.server)
         self.controller = Controller(self.semaphore, self.server)
 
     def create_threads(self):
@@ -54,6 +56,7 @@ class SystemSetup:
         self.pump = Pump(self.client_pump)
         self.temperature_control = TemperatureControl(self.client_temperature_control)
         self.ids = IDS(self.client_ids)
+        self.attacker = Attacker(self.server)
         self.controller = Controller(self.semaphore, self.server)
 
         # Start threads
@@ -66,6 +69,7 @@ class SystemSetup:
         self.temperature_control.start()
         self.level_transmitter.start()
         self.ids.start()
+        self.attacker.start()
         self.controller.start()
 
         print(Fore.LIGHTGREEN_EX + "System initialized." + Style.RESET_ALL)
@@ -90,6 +94,7 @@ class SystemSetup:
         self.temperature_control.join()
         self.level_transmitter.join()
         self.ids.join()
+        self.attacker.join()
         self.controller.join()
 
         if self.server.stop_process():
