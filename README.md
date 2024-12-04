@@ -29,10 +29,10 @@ The project is organized as follows:
 ```
 IndustrialPlantSimulation/
 │
-├── .venv/                       # Virtual environment
+├── .venv/                        # Virtual environment
 │
 ├── App/
-│   └── app.py                   # Main application entry point
+│   └── app.py                    # Main application entry point
 │
 ├── Attacker/
 │   ├── Arsenal/
@@ -41,7 +41,9 @@ IndustrialPlantSimulation/
 │   │   ├── insert_event.py       # Logic for inserting events
 │   │   ├── intercept_event.py    # Logic for intercepting events
 │   │   └── stealth_insert.py     # Logic for stealth event insertion
-│   └── attacker.py               # Main attacker module
+│   ├── Automaton/
+│   │   └── attack_automaton.py   # Automaton for attack control
+│   └── attacker.py               # Main attacker thread module
 │
 ├── Configuration/
 │   └── set_points.py             # Configuration settings for the application
@@ -49,11 +51,15 @@ IndustrialPlantSimulation/
 ├── Core/
 │   ├── Control/
 │   │   └── DES/
-│   │       └── controller.py     # Control system for the application
+│   │   │   ├── Automaton.py      # Implementation of a automaton logic
+│   │   │   ├── DES.py            # Main control logic of a DES service manager
+│   │   │   ├── State.py          # State DES definition
+│   │   │   └── Supervisor.py     # Implementation of a supervisor logic
+│   │   └── controller.py         # Control system for the application
 │   │
 │   ├── Process/
 │   │   ├── Automaton/
-│   │   │   └── process_automaton.py   # Automaton for process control
+│   │   │   └── process_automaton.py  # Automaton for process control
 │   │   ├── Tank/
 │   │   │   └── tank.py               # Tank system control
 │   │   └── process.py                # Process logic
@@ -61,17 +67,21 @@ IndustrialPlantSimulation/
 │   └── SubSystems/
 │       ├── InputValve/
 │       │   ├── Automaton/
-│       │   │   └── input_valve_automaton.py     # Automaton for input valve control
+│       │   │   └── input_valve_automaton.py         # Automaton for input valve control
 │       │   ├── Supervisors/
 │       │   │   ├── close_input_valve_supervisor.py  # Supervisor to close input valve
 │       │   │   └── open_input_valve_supervisor.py   # Supervisor to open input valve
-│       │   └── input_valve.py                     # Input valve system
+│       │   └── input_valve.py                       # Input valve system
 │       │
 │       ├── LevelTransmitter/        # Level transmitter subsystem
 │       ├── Mixer/                   # Mixer subsystem
 │       ├── OutputValve/             # Output valve subsystem
 │       ├── Pump/                    # Pump subsystem
 │       └── TemperatureControl/      # Temperature control subsystem
+│
+├── IDS/
+│   ├── ids.py                     # Implementation of IDS thread monitoring
+│   └── process_sequence.py        # Expected event sequence of the system
 │
 ├── OPCClient/                     # OPC client for communication
 ├── OPCServer/                     # OPC server for communication

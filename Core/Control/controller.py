@@ -4,7 +4,11 @@ from collections import deque
 
 from colorama import Fore, Style
 
+from Attacker.Automaton.control_temperature_attack_automaton import ControlTemperatureAttackAutomaton
 from Attacker.Automaton.input_valve_attack_automaton import InputValveAttackAutomaton
+from Attacker.Automaton.mixer_attack_automaton import MixerAttackAutomaton
+from Attacker.Automaton.output_valve_attack_automaton import OutputValveAttackAutomaton
+from Attacker.Automaton.pump_attack_automaton import PumpAttackAutomaton
 from Attacker.attacker import Attacker
 from Core.Control.DES.DES import DES
 from Core.SubSystems.InputValve.Automaton.input_valve_automaton import InputValveAutomaton
@@ -56,11 +60,15 @@ class Controller(threading.Thread):
 
     def initialize_automatons(self):
         automatons = [
-            InputValveAttackAutomaton(),
             ProcessAutomaton(), InputValveAutomaton(),
             OutputValveAutomaton(), MixerAutomaton(),
             PumpAutomaton(), TemperatureControlAutomaton()
         ]
+
+        '''InputValveAttackAutomaton(), ControlTemperatureAttackAutomaton(),
+            MixerAttackAutomaton(), PumpAttackAutomaton(),
+            OutputValveAttackAutomaton(),'''
+
         for automaton in automatons:
             self.control.add_plant(automaton.initialize_automaton())
 

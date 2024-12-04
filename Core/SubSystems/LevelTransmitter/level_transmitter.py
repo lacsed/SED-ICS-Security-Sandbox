@@ -26,7 +26,8 @@ class LevelTransmitter(threading.Thread):
             if self.client.query_variable('Level') >= 100:
                 self.client.update_level_low(False)
                 self.client.update_level_high(True)
-            self.client.update_open_input_valve(False)
+            if self.client.read_close_input_valve():
+                self.client.update_open_input_valve(False)
 
         while self.client.query_variable('Level') > 0:
             self.stop_device_process()
@@ -37,5 +38,6 @@ class LevelTransmitter(threading.Thread):
             if self.client.query_variable('Level') <= 0:
                 self.client.update_level_high(False)
                 self.client.update_level_low(True)
-            self.client.update_open_output_valve(False)
+            if self.client.read_close_output_valve():
+                self.client.update_open_output_valve(False)
             self.client.update_finish_process(True)
