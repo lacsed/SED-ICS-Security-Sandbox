@@ -4,15 +4,11 @@
 
 O conteúdo deste repositório está relacionado ao artigo de título: "Implementação de uma Plataforma para Testes de Cibersegurança em Sistemas de Controle Industriais Modelados por SEDs" submetido para o XVII Simpósio Brasileiro de Automação Inteligente (SBAI).
 
-## A Plataforma
-
-Este sistema é implementado com base em uma arquitetura cliente-servidor, utilizando a tecnologia **OPC UA** (_Open Platform Communications - Unified Architecture_). OPC UA é um padrão de comunicação amplamente adotado na automação industrial para permitir a troca de dados entre dispositivos, sistemas e softwares.
-
-![Image](https://github.com/user-attachments/assets/09d0f87b-edca-4680-95a9-4c9c18f70f7e)
-
 ## Visão Geral
 
 A interface gráfica do sistema representa um tanque que integra seis subsistemas distintos, os quais operam conjuntamente no processo de produção de um produto.
+
+![Image](https://github.com/user-attachments/assets/09d0f87b-edca-4680-95a9-4c9c18f70f7e)
 
 ## Subsistemas
 
@@ -38,16 +34,32 @@ Na etapa seguinte, o sistema de controle de temperatura é ativado para aquecer 
 
 Por fim, a válvula de saída é aberta para liberar o produto do tanque. O sistema aguarda o evento de nível baixo, que indica que o tanque foi esvaziado até o nível desejado. Assim que o tanque é esvaziado, a válvula de saída é fechada, encerrando o processo.
 
+## Componentes da Plataforma
+
+A interface gráfica da plataforma é dividida em seções. Ela conta com um menu lateral, a tela que exibe o processo físico da planta, uma central de segurança, e centros de operação para coordenação manual do sistema e controle de ataques. Visores no canto inferior indicam a localização dos eventos processados, o evento atacado e o tipo de ataque em execução.
+
+O menu lateral permite definir as temperaturas inicial, de aquecimento e resfriamento, assim como os tempos correspondentes de aquecimento e resfriamento do fluido. Também possibilita a seleção dos modos de operação do processo e de ataque, além de conter os botões _Start_ e _Stop_ para iniciar e interromper a execução da simulação. Uma tabela exibe em tempo real a lista de eventos trafegados na rede.
+
+![Image](https://github.com/user-attachments/assets/4268a0cc-4df4-48b9-acf4-e279b0f91bb1)
+
+## Simulações
+
+A plataforma conta com dois modos de operação para o atacante: furtivo e convencional. Cada modo adota uma estratégia distinta, permitindo explorar diferentes cenários de ataque e avaliar o impacto desses ataques no sistema físico.
+
+### Modo Furtivo
+
+No modo furtivo, o foco principal é minimizar a possibilidade de detecção pelo IDS. Para isso, o sistema adota pausas temporais após a inserção ou remoção de eventos. Essa abordagem tem como objetivo reduzir a exposição do atacante ao sistema, evitando detecções imediatas, dado que o IDS opera em ciclos de execução, verificando os eventos que estão sendo trafegados a medida que cada evento vai sendo disparado e trafegado na rede. Conforme mostrado no vídeo abaixo.
+
 <div class="video-container">
   <iframe src="https://www.youtube.com/embed/OgW2W8uHYtQ" 
     frameborder="0" allowfullscreen></iframe>
 </div>
 
-### Software
+### Modo convencional
 
-The code for each node is available below.
+Já o modo convencional adota uma abordagem direta, sem se preocupar em evitar a detecção pelo IDS. As ações são realizadas de forma rápida e sem cautela, com eventos sendo removidos e inseridos novamente em intervalos de tempo aleatórios tornando o ataque mais agressivo, mas também mais vulnerável à identificação.
 
-- [Controller](https://github.com/michelrodrigo/DES-control-system/tree/gh-pages/sources/codes/decentralized/controller)
-- [Node 1](https://github.com/michelrodrigo/DES-control-system/tree/gh-pages/sources/codes/decentralized/node1)
-- [Node 2](https://github.com/michelrodrigo/DES-control-system/tree/gh-pages/sources/codes/decentralized/node2)
-- [Node 3](https://github.com/michelrodrigo/DES-control-system/tree/gh-pages/sources/codes/decentralized/node3)
+<div class="video-container">
+  <iframe src="https://www.youtube.com/embed/A9N\_vIwC0io" 
+    frameborder="0" allowfullscreen></iframe>
+</div>
