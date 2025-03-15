@@ -1,0 +1,12 @@
+theme: jekyll-theme-leap-day
+title: Plataforma para Testes de Cibersegurança em Sistemas de Controle Industriais Modelados por SEDs
+
+# Build settings
+markdown: kramdown
+highlighter: rouge
+paginate: 5
+
+kramdown:
+  input: GFM
+  hard_wrap: false
+  # syntax_highlighter: rouge
