@@ -1,4 +1,4 @@
-# Industrial Plant Simulation
+# SED ICS Security Sandbox
 
 This project represents a real industrial process consisting of the following production steps:
 
