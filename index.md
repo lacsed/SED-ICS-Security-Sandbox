@@ -60,6 +60,6 @@ No modo furtivo, o foco principal é minimizar a possibilidade de detecção pel
 Já o modo convencional adota uma abordagem direta, sem se preocupar em evitar a detecção pelo IDS. As ações são realizadas de forma rápida e sem cautela, com eventos sendo removidos e inseridos novamente em intervalos de tempo aleatórios tornando o ataque mais agressivo, mas também mais vulnerável à identificação.
 
 <div class="video-container">
-  <iframe src="https://www.youtube.com/embed/A9N\_vIwC0io" 
+  <iframe src="https://www.youtube.com/embed/A9N_vIwC0io" 
     frameborder="0" allowfullscreen></iframe>
 </div>
