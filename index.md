@@ -41,25 +41,3 @@ A interface gráfica da plataforma é dividida em seções. Ela conta com um men
 O menu lateral permite definir as temperaturas inicial, de aquecimento e resfriamento, assim como os tempos correspondentes de aquecimento e resfriamento do fluido. Também possibilita a seleção dos modos de operação do processo e de ataque, além de conter os botões _Start_ e _Stop_ para iniciar e interromper a execução da simulação. Uma tabela exibe em tempo real a lista de eventos trafegados na rede.
 
 ![Image](https://github.com/user-attachments/assets/4268a0cc-4df4-48b9-acf4-e279b0f91bb1)
-
-## Simulações
-
-A plataforma conta com dois modos de operação para o atacante: furtivo e convencional. Cada modo adota uma estratégia distinta, permitindo explorar diferentes cenários de ataque e avaliar o impacto desses ataques no sistema físico.
-
-### Modo Furtivo
-
-No modo furtivo, o foco principal é minimizar a possibilidade de detecção pelo IDS. Para isso, o sistema adota pausas temporais após a inserção ou remoção de eventos. Essa abordagem tem como objetivo reduzir a exposição do atacante ao sistema, evitando detecções imediatas, dado que o IDS opera em ciclos de execução, verificando os eventos que estão sendo trafegados a medida que cada evento vai sendo disparado e trafegado na rede. Conforme mostrado no vídeo abaixo.
-
-<div class="video-container">
-  <iframe src="https://www.youtube.com/embed/OgW2W8uHYtQ" 
-    frameborder="0" allowfullscreen></iframe>
-</div>
-
-### Modo convencional
-
-Já o modo convencional adota uma abordagem direta, sem se preocupar em evitar a detecção pelo IDS. As ações são realizadas de forma rápida e sem cautela, com eventos sendo removidos e inseridos novamente em intervalos de tempo aleatórios tornando o ataque mais agressivo, mas também mais vulnerável à identificação.
-
-<div class="video-container">
-  <iframe src="https://www.youtube.com/embed/A9N_vIwC0io" 
-    frameborder="0" allowfullscreen></iframe>
-</div>
